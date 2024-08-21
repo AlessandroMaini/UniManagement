@@ -4,6 +4,7 @@ import com.example.unimanagement.entities.Course;
 import com.example.unimanagement.entities.Student;
 import com.example.unimanagement.entities.Teacher;
 import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -16,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
+import javax.management.InvalidAttributeValueException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
@@ -173,10 +175,40 @@ public class GeneralOverviewController {
         }
     }
 
+    /**
+     * Deletes the selected course from the DB
+     */
     private void handleDeleteCourse() {
+        try {
+            int selectedIndex = selectedIndex(courseTable);
+            em.getTransaction().begin();
+
+            Course c = courseTable.getItems().get(selectedIndex);
+            em.remove(c);
+
+            em.getTransaction().commit();
+            courseTable.getItems().remove(selectedIndex);
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        }
     }
 
+    /**
+     * Deletes the selected student from the DB
+     */
     private void handleDeleteStudent() {
+        try {
+            int selectedIndex = selectedIndex(studentTable);
+            em.getTransaction().begin();
+
+            Student s = studentTable.getItems().get(selectedIndex);
+            em.remove(s);
+
+            em.getTransaction().commit();
+            studentTable.getItems().remove(selectedIndex);
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        }
     }
 
     @FXML
@@ -230,12 +262,77 @@ public class GeneralOverviewController {
         }
     }
 
+    /**
+     * Updates the information about the selected course
+     */
     private void handleEditCourse() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("course-edit-view.fxml"));
+            DialogPane view = loader.load();
+            CourseEditDialogController controller = loader.getController();
 
+            int selectedIndex = selectedIndex(courseTable);
+            controller.setCourse(courseTable.getItems().get(selectedIndex));
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Course");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Course c = courseTable.getItems().get(selectedIndex);
+                controller.updateCourse(c);
+
+                em.getTransaction().commit();
+                courseTable.refresh();
+            }
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Updates the information about the selected student
+     */
     private void handleEditStudent() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("student-edit-view.fxml"));
+            DialogPane view = loader.load();
+            StudentEditDialogController controller = loader.getController();
+            controller.initializeEdit();
 
+            int selectedIndex = selectedIndex(studentTable);
+            controller.setStudent(studentTable.getItems().get(selectedIndex));
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Student");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Student s = studentTable.getItems().get(selectedIndex);
+                controller.updateStudent(s);
+
+                em.getTransaction().commit();
+                studentTable.refresh();
+            }
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (InvalidAttributeValueException e) {
+            showInvalidAttributeValueAlert();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -277,21 +374,85 @@ public class GeneralOverviewController {
 
                 controller.updateTeacher(newTeacher);
                 em.persist(newTeacher);
-                teacherTable.getItems().add(newTeacher);
 
                 em.getTransaction().commit();
+                teacherTable.getItems().add(newTeacher);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Adds a new course to the DB
+     */
     private void handleNewCourse() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("course-edit-view.fxml"));
+            DialogPane view = loader.load();
+            CourseEditDialogController controller = loader.getController();
 
+            Course newCourse = new Course("Course Name");
+            controller.setCourse(newCourse);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("New Course");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                controller.updateCourse(newCourse);
+                em.persist(newCourse);
+
+                em.getTransaction().commit();
+                courseTable.getItems().add(newCourse);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    /**
+     * Adds a new student to the DB
+     */
     private void handleNewStudent() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("student-edit-view.fxml"));
+            DialogPane view = loader.load();
+            StudentEditDialogController controller = loader.getController();
+            controller.initializeNew();
 
+            Student newStudent = new Student("First Name", "Last Name", "Residence", LocalDate.now());
+            controller.setStudent(newStudent);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("New Student");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                controller.updateStudent(newStudent);
+                em.persist(newStudent);
+
+                em.getTransaction().commit();
+                studentTable.getItems().add(newStudent);
+            }
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (InvalidAttributeValueException | EntityExistsException e) {
+            showInvalidAttributeValueAlert();
+            em.getTransaction().commit();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -321,13 +482,24 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog
+     * Shows a simple warning dialog in case of no selection
      */
     void showNoPersonSelectedAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("No Selection");
         alert.setHeaderText("Nothing Selected");
         alert.setContentText("Please select something in the table.");
+        alert.showAndWait();
+    }
+
+    /**
+     * Shows a simple warning dialog in case of wrong attributes
+     */
+    void showInvalidAttributeValueAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Invalid Serial");
+        alert.setHeaderText("Invalid Serial Number");
+        alert.setContentText("Please select a new 6 digits serial number.");
         alert.showAndWait();
     }
 }

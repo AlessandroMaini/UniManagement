@@ -3,6 +3,9 @@ package com.example.unimanagement.entities;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Cascade;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "courses")
 public class Course {
@@ -15,6 +18,18 @@ public class Course {
 
     @ManyToOne
     private Teacher teacher;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE)
+    private List<Enrollment> enrollmentList;
+
+    public Course() {
+    }
+
+    public Course(String name) {
+        this.name = name;
+        this.teacher = null;
+        this.enrollmentList = new ArrayList<>();
+    }
 
     public int getId() {
         return id;
@@ -45,5 +60,18 @@ public class Course {
             return "";
         else
             return teacher.getFirstName() + " " + teacher.getLastName();
+    }
+
+    public List<Enrollment> getEnrollmentList() {
+        return enrollmentList;
+    }
+
+    public void setEnrollmentList(List<Enrollment> enrollmentList) {
+        this.enrollmentList = enrollmentList;
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" + "id=" + id + ", name='" + name + '\'' + '}';
     }
 }

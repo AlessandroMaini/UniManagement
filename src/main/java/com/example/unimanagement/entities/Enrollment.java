@@ -13,7 +13,7 @@ public class Enrollment {
     private int id;
 
     @Column(nullable = true)
-    private int grade;
+    private Integer grade;
 
     @Column(nullable = true)
     private LocalDate examinationDate;
@@ -32,11 +32,11 @@ public class Enrollment {
         this.id = id;
     }
 
-    public int getGrade() {
+    public Integer getGrade() {
         return grade;
     }
 
-    public void setGrade(int grade) {
+    public void setGrade(Integer grade) {
         this.grade = grade;
     }
 

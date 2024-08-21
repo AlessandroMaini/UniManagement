@@ -14,4 +14,5 @@ open module com.example.unimanagement {
         requires jakarta.persistence;
         requires com.zaxxer.hikari;
         requires org.hibernate.orm.core;
+    requires java.management;
 }
