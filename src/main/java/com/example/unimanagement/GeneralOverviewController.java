@@ -3,7 +3,6 @@ package com.example.unimanagement;
 import com.example.unimanagement.entities.Course;
 import com.example.unimanagement.entities.Student;
 import com.example.unimanagement.entities.Teacher;
-import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
 import jakarta.persistence.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import javax.management.InvalidAttributeValueException;
 import java.io.IOException;
@@ -43,24 +41,7 @@ public class GeneralOverviewController {
     @FXML private TableColumn<Teacher, String> teacherResidenceColumn;
     @FXML private TableColumn<Teacher, LocalDate> teacherBirthdayColumn;
 
-    /**
-     * Creates a persistence context
-     */
-//    static Map<String, String> props = new HashMap<>();
-//    static {
-//        props.put("hibernate.show_sql", "true");
-//    }
-//    EntityManagerFactory emf = new HibernatePersistenceProvider()
-//            .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-//    EntityManager em = emf.createEntityManager();
     EntityManagerFactory emf;
-
-    public GeneralOverviewController() {
-        Map<String, String> props = new HashMap<>();
-        props.put("hibernate.show_sql", "true");
-        emf = new HibernatePersistenceProvider()
-                    .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-    }
 
     /**
      * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
@@ -73,18 +54,19 @@ public class GeneralOverviewController {
         initializeCourses();
     }
 
+    public void setEmf(EntityManagerFactory emf) {
+        this.emf = emf;
+        fillTables();
+    }
+
     /**
-     * Initializes the students TableView
+     * Fills the students, courses and teachers tables with the data from the DB
      */
-    public void initializeStudents() {
-
-        studentSerialColumn.setCellValueFactory(new PropertyValueFactory<>("serial"));
-        studentFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        studentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-        studentResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
-        studentBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
-
+    @FXML
+    private void fillTables() {
         studentTable.setItems(getStudentData());
+        courseTable.setItems(getCourseData());
+        teacherTable.setItems(getTeacherData());
     }
 
     private ObservableList<Student> getStudentData() {
@@ -103,45 +85,6 @@ public class GeneralOverviewController {
         return studentObservableList;
     }
 
-    /**
-     * Initializes the courses TableView
-     */
-    public void initializeCourses() {
-
-        courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
-
-        courseTable.setItems(getCourseData());
-        courseTable.setRowFactory(tv -> {
-            TableRow<Course> row = new TableRow<>();
-            row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
-                    Course course = row.getItem();
-                    switchToCourseOverview(course);
-                }
-            });
-            return row ;
-        });
-    }
-
-    @FXML
-    private void switchToCourseOverview(Course course) {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("course-overview-view.fxml"));
-            Parent root = loader.load();
-
-            CourseOverviewController controller = loader.getController();
-            controller.setCourse(course);
-
-            Stage stage = (Stage) courseTable.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private ObservableList<Course> getCourseData() {
         ObservableList<Course> courseObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -158,19 +101,6 @@ public class GeneralOverviewController {
         return courseObservableList;
     }
 
-    /**
-     * Initializes the teachers TableView
-     */
-    public void initializeTeachers() {
-
-        teacherFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
-        teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
-        teacherBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
-
-        teacherTable.setItems(getTeacherData());
-    }
-
     private ObservableList<Teacher> getTeacherData() {
         ObservableList<Teacher> teacherObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -185,6 +115,72 @@ public class GeneralOverviewController {
             e.printStackTrace();
         }
         return teacherObservableList;
+    }
+
+    /**
+     * Initializes the students TableView
+     */
+    public void initializeStudents() {
+
+        studentSerialColumn.setCellValueFactory(new PropertyValueFactory<>("serial"));
+        studentFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        studentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        studentResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
+        studentBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
+    }
+
+    /**
+     * Initializes the courses TableView
+     */
+    public void initializeCourses() {
+
+        courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
+
+        courseTable.setRowFactory(tv -> {
+            TableRow<Course> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Course course = row.getItem();
+                    switchToCourseOverview(course);
+                }
+            });
+            return row ;
+        });
+    }
+
+    /**
+     * Switches the scene to the course overview
+     * @param course the course to overview
+     */
+    @FXML
+    private void switchToCourseOverview(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("course-overview-view.fxml"));
+            Parent root = loader.load();
+
+            CourseOverviewController controller = loader.getController();
+            controller.setEmf(emf);
+            controller.setCourse(course);
+
+            Stage stage = (Stage) courseTable.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Initializes the teachers TableView
+     */
+    public void initializeTeachers() {
+
+        teacherFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
+        teacherBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
     }
 
     @FXML

@@ -1,7 +1,6 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,20 +9,35 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
-import java.io.IOException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class UniManagementApplication extends Application {
+
+    private EntityManagerFactory emf;
+
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("general-overview-view.fxml")));
+        Map<String, String> props = new HashMap<>();
+        props.put("hibernate.show_sql", "true");
+        emf = new HibernatePersistenceProvider()
+                .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("general-overview-view.fxml"));
+        Parent root = loader.load();
+
+        GeneralOverviewController generalOverviewController = loader.getController();
+        generalOverviewController.setEmf(emf);
+
         Scene scene = new Scene(root);
         stage.setTitle("Uni Management");
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        if (emf != null && emf.isOpen())
+            emf.close();
     }
 
     public static void main(String[] args) {

@@ -2,7 +2,6 @@ package com.example.unimanagement;
 
 import com.example.unimanagement.entities.Course;
 import com.example.unimanagement.entities.Enrollment;
-import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -15,12 +14,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class CourseOverviewController {
@@ -40,25 +36,11 @@ public class CourseOverviewController {
     @FXML private TableColumn<Enrollment, Optional<Integer>> enrollmentGradeColumn;
 
     Course course;
-
-    /**
-     * Creates a persistence context
-     */
-//    static Map<String, String> props = new HashMap<>();
-//    static {
-//        props.put("hibernate.show_sql", "true");
-//    }
-//    EntityManagerFactory emf = new HibernatePersistenceProvider()
-//            .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
     EntityManagerFactory emf;
 
-    public CourseOverviewController() {
-        Map<String, String> props = new HashMap<>();
-        props.put("hibernate.show_sql", "true");
-        emf = new HibernatePersistenceProvider()
-                .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-    }
-
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
 
@@ -71,10 +53,20 @@ public class CourseOverviewController {
         enrollmentGradeColumn.setCellValueFactory(new PropertyValueFactory<>("grade"));
     }
 
-    @FXML
+    public void setEmf(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
+
     public void setCourse(Course course) {
         this.course = course;
+        uploadData();
+    }
 
+    /**
+     * Upload the course info from the DB and updates the view
+     */
+    @FXML
+    private void uploadData() {
         courseTitleLabel.setText(this.course.getName());
         teacherLabel.setText(this.course.getTeacherName());
         avgGradeLabel.setText(getAvgGradeQuery());
@@ -83,6 +75,10 @@ public class CourseOverviewController {
         enrollmentTable.setItems(getEnrollmentData());
     }
 
+    /**
+     * Returns the list of enrollments for the course
+     * @return the list of enrollments for the course
+     */
     private ObservableList<Enrollment> getEnrollmentData() {
         ObservableList<Enrollment> enrollmentObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -105,6 +101,10 @@ public class CourseOverviewController {
         return enrollmentObservableList;
     }
 
+    /**
+     * Returns the number of students in the course
+     * @return the number of students in the course
+     */
     private String getNStudentsQuery() {
         String nStudents = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -128,6 +128,10 @@ public class CourseOverviewController {
         return nStudents;
     }
 
+    /**
+     * Returns the average grade of the course exams
+     * @return the average grade of the course exams
+     */
     private String getAvgGradeQuery() {
         String avgGrade = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -154,12 +158,18 @@ public class CourseOverviewController {
         return avgGrade;
     }
 
+    /**
+     * Switches the scene to the general overview
+     */
     @FXML
     public void handleBack() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("general-overview-view.fxml"));
             Parent root = loader.load();
+
+            GeneralOverviewController generalOverviewController = loader.getController();
+            generalOverviewController.setEmf(emf);
 
             Stage stage = (Stage) enrollmentTable.getScene().getWindow();
             Scene scene = new Scene(root);
