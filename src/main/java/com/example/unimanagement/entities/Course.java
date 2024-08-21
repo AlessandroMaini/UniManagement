@@ -57,7 +57,7 @@ public class Course {
 
     public String getTeacherName() {
         if (teacher == null)
-            return "";
+            return "Unassigned";
         else
             return teacher.getFirstName() + " " + teacher.getLastName();
     }

@@ -4,17 +4,17 @@ import com.example.unimanagement.entities.Course;
 import com.example.unimanagement.entities.Student;
 import com.example.unimanagement.entities.Teacher;
 import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
 import javax.management.InvalidAttributeValueException;
@@ -27,7 +27,7 @@ public class GeneralOverviewController {
     @FXML private TabPane tabPane;
 
     @FXML private TableView<Student> studentTable;
-    @FXML private TableColumn<Student, Integer> studentSerialColumn;
+    @FXML private TableColumn<Student, String> studentSerialColumn;
     @FXML private TableColumn<Student, String> studentFirstNameColumn;
     @FXML private TableColumn<Student, String> studentLastNameColumn;
     @FXML private TableColumn<Student, String> studentResidenceColumn;
@@ -46,13 +46,21 @@ public class GeneralOverviewController {
     /**
      * Creates a persistence context
      */
-    static Map<String, String> props = new HashMap<>();
-    static {
+//    static Map<String, String> props = new HashMap<>();
+//    static {
+//        props.put("hibernate.show_sql", "true");
+//    }
+//    EntityManagerFactory emf = new HibernatePersistenceProvider()
+//            .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
+//    EntityManager em = emf.createEntityManager();
+    EntityManagerFactory emf;
+
+    public GeneralOverviewController() {
+        Map<String, String> props = new HashMap<>();
         props.put("hibernate.show_sql", "true");
+        emf = new HibernatePersistenceProvider()
+                    .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
     }
-    EntityManagerFactory emf = new HibernatePersistenceProvider()
-            .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-    EntityManager em = emf.createEntityManager();
 
     /**
      * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
@@ -80,14 +88,18 @@ public class GeneralOverviewController {
     }
 
     private ObservableList<Student> getStudentData() {
-        em.getTransaction().begin();
+        ObservableList<Student> studentObservableList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
 
-        String jpql = "SELECT s FROM Student s";
-        TypedQuery<Student> q = em.createQuery(jpql, Student.class);
-        ObservableList<Student> studentObservableList = FXCollections.observableList(q.getResultList());
+            String jpql = "SELECT s FROM Student s";
+            TypedQuery<Student> q = em.createQuery(jpql, Student.class);
+            studentObservableList = FXCollections.observableList(q.getResultList());
 
-        em.getTransaction().commit(); // ends the transaction
-
+            em.getTransaction().commit(); // ends the transaction
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return studentObservableList;
     }
 
@@ -100,17 +112,49 @@ public class GeneralOverviewController {
         courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
 
         courseTable.setItems(getCourseData());
+        courseTable.setRowFactory(tv -> {
+            TableRow<Course> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Course course = row.getItem();
+                    switchToCourseOverview(course);
+                }
+            });
+            return row ;
+        });
+    }
+
+    @FXML
+    private void switchToCourseOverview(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("course-overview-view.fxml"));
+            Parent root = loader.load();
+
+            CourseOverviewController controller = loader.getController();
+            controller.setCourse(course);
+
+            Stage stage = (Stage) courseTable.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private ObservableList<Course> getCourseData() {
-        em.getTransaction().begin();
+        ObservableList<Course> courseObservableList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
 
-        String jpql = "SELECT c FROM Course c";
-        TypedQuery<Course> q = em.createQuery(jpql, Course.class);
-        ObservableList<Course> courseObservableList = FXCollections.observableList(q.getResultList());
+            String jpql = "SELECT c FROM Course c";
+            TypedQuery<Course> q = em.createQuery(jpql, Course.class);
+            courseObservableList = FXCollections.observableList(q.getResultList());
 
-        em.getTransaction().commit();
-
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return courseObservableList;
     }
 
@@ -128,14 +172,18 @@ public class GeneralOverviewController {
     }
 
     private ObservableList<Teacher> getTeacherData() {
-        em.getTransaction().begin();
+        ObservableList<Teacher> teacherObservableList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
 
-        String jpql = "SELECT t FROM Teacher t";
-        TypedQuery<Teacher> q = em.createQuery(jpql, Teacher.class);
-        ObservableList<Teacher> teacherObservableList = FXCollections.observableList(q.getResultList());
+            String jpql = "SELECT t FROM Teacher t";
+            TypedQuery<Teacher> q = em.createQuery(jpql, Teacher.class);
+            teacherObservableList = FXCollections.observableList(q.getResultList());
 
-        em.getTransaction().commit();
-
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return teacherObservableList;
     }
 
@@ -158,20 +206,22 @@ public class GeneralOverviewController {
      * Deletes the selected teacher from the DB
      */
     private void handleDeleteTeacher() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex(teacherTable);
             em.getTransaction().begin();
 
-            Teacher t = teacherTable.getItems().get(selectedIndex);
+            Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
             for (Course c : t.getCourseList())
                 c.setTeacher(null);
             em.remove(t);
 
             em.getTransaction().commit();
-            courseTable.refresh();
+            courseTable.setItems(getCourseData());
             teacherTable.getItems().remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -179,17 +229,19 @@ public class GeneralOverviewController {
      * Deletes the selected course from the DB
      */
     private void handleDeleteCourse() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex(courseTable);
             em.getTransaction().begin();
 
-            Course c = courseTable.getItems().get(selectedIndex);
+            Course c = em.merge(courseTable.getItems().get(selectedIndex));
             em.remove(c);
 
             em.getTransaction().commit();
             courseTable.getItems().remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -197,17 +249,19 @@ public class GeneralOverviewController {
      * Deletes the selected student from the DB
      */
     private void handleDeleteStudent() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex(studentTable);
             em.getTransaction().begin();
 
-            Student s = studentTable.getItems().get(selectedIndex);
+            Student s = em.merge(studentTable.getItems().get(selectedIndex));
             em.remove(s);
 
             em.getTransaction().commit();
             studentTable.getItems().remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -230,7 +284,7 @@ public class GeneralOverviewController {
      * Updates the information about the selected teacher
      */
     private void handleEditTeacher() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -248,16 +302,16 @@ public class GeneralOverviewController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Teacher t = teacherTable.getItems().get(selectedIndex);
+                Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
                 controller.updateTeacher(t);
 
                 em.getTransaction().commit();
-                courseTable.refresh();
-                teacherTable.refresh();
+                courseTable.setItems(getCourseData());
+                teacherTable.setItems(getTeacherData());
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -266,7 +320,7 @@ public class GeneralOverviewController {
      * Updates the information about the selected course
      */
     private void handleEditCourse() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("course-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -284,15 +338,15 @@ public class GeneralOverviewController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Course c = courseTable.getItems().get(selectedIndex);
+                Course c = em.merge(courseTable.getItems().get(selectedIndex));
                 controller.updateCourse(c);
 
                 em.getTransaction().commit();
-                courseTable.refresh();
+                courseTable.setItems(getCourseData());
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -301,7 +355,7 @@ public class GeneralOverviewController {
      * Updates the information about the selected student
      */
     private void handleEditStudent() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("student-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -320,17 +374,17 @@ public class GeneralOverviewController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Student s = studentTable.getItems().get(selectedIndex);
+                Student s = em.merge(studentTable.getItems().get(selectedIndex));
                 controller.updateStudent(s);
 
                 em.getTransaction().commit();
-                studentTable.refresh();
+                studentTable.setItems(getStudentData());
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
         } catch (InvalidAttributeValueException e) {
             showInvalidAttributeValueAlert();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -354,7 +408,7 @@ public class GeneralOverviewController {
      * Adds a new teacher to the DB
      */
     private void handleNewTeacher() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -378,7 +432,7 @@ public class GeneralOverviewController {
                 em.getTransaction().commit();
                 teacherTable.getItems().add(newTeacher);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -387,7 +441,7 @@ public class GeneralOverviewController {
      * Adds a new course to the DB
      */
     private void handleNewCourse() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("course-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -411,7 +465,7 @@ public class GeneralOverviewController {
                 em.getTransaction().commit();
                 courseTable.getItems().add(newCourse);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -420,7 +474,7 @@ public class GeneralOverviewController {
      * Adds a new student to the DB
      */
     private void handleNewStudent() {
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getResource("student-edit-view.fxml"));
             DialogPane view = loader.load();
@@ -447,10 +501,9 @@ public class GeneralOverviewController {
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (InvalidAttributeValueException | EntityExistsException e) {
+        } catch (InvalidAttributeValueException | PersistenceException e) {
             showInvalidAttributeValueAlert();
-            em.getTransaction().commit();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
