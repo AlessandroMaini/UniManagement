@@ -10,15 +10,15 @@ import jakarta.persistence.TypedQuery;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 public class GeneralOverviewController {
 
@@ -158,17 +158,15 @@ public class GeneralOverviewController {
     private void handleDeleteTeacher() {
         try {
             int selectedIndex = selectedIndex(teacherTable);
-            System.out.println(selectedIndex);
             em.getTransaction().begin();
 
-            Teacher t = em.find(Teacher.class, teacherTable.getItems().get(selectedIndex).getId());
-            for (Course c : t.getCourseList()) {
+            Teacher t = teacherTable.getItems().get(selectedIndex);
+            for (Course c : t.getCourseList())
                 c.setTeacher(null);
-                courseTable.refresh();
-            }
             em.remove(t);
 
             em.getTransaction().commit();
+            courseTable.refresh();
             teacherTable.getItems().remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
@@ -183,11 +181,116 @@ public class GeneralOverviewController {
 
     @FXML
     public void handleEdit() {
+        switch (Objects.requireNonNull(getSelectedTab())) {
+            case "Students":
+                handleEditStudent();
+                break;
+            case "Courses":
+                handleEditCourse();
+                break;
+            case "Teachers":
+                handleEditTeacher();
+                break;
+        }
+    }
+
+    /**
+     * Updates the information about the selected teacher
+     */
+    private void handleEditTeacher() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
+            DialogPane view = loader.load();
+            TeacherEditDialogController controller = loader.getController();
+
+            int selectedIndex = selectedIndex(teacherTable);
+            controller.setTeacher(teacherTable.getItems().get(selectedIndex));
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Teacher");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Teacher t = teacherTable.getItems().get(selectedIndex);
+                controller.updateTeacher(t);
+
+                em.getTransaction().commit();
+                courseTable.refresh();
+                teacherTable.refresh();
+            }
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleEditCourse() {
+
+    }
+
+    private void handleEditStudent() {
 
     }
 
     @FXML
     public void handleNew() {
+        switch (Objects.requireNonNull(getSelectedTab())) {
+            case "Students":
+                handleNewStudent();
+                break;
+            case "Courses":
+                handleNewCourse();
+                break;
+            case "Teachers":
+                handleNewTeacher();
+                break;
+        }
+    }
+
+    /**
+     * Adds a new teacher to the DB
+     */
+    private void handleNewTeacher() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
+            DialogPane view = loader.load();
+            TeacherEditDialogController controller = loader.getController();
+
+            Teacher newTeacher = new Teacher("First Name", "Last Name", "Residence", LocalDate.now());
+            controller.setTeacher(newTeacher);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("New Teacher");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                controller.updateTeacher(newTeacher);
+                em.persist(newTeacher);
+                teacherTable.getItems().add(newTeacher);
+
+                em.getTransaction().commit();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleNewCourse() {
+
+    }
+
+    private void handleNewStudent() {
 
     }
 

@@ -14,11 +14,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class UniManagementApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("general-overview-view.fxml"));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("general-overview-view.fxml")));
         Scene scene = new Scene(root);
         stage.setTitle("Uni Management");
         stage.setScene(scene);

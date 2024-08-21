@@ -3,6 +3,7 @@ package com.example.unimanagement.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +24,27 @@ public class Teacher {
     private String residence;
 
     private LocalDate birthday;
+
+    public Teacher() {
+    }
+
+    public Teacher(Teacher other) {
+        this.id = other.getId();
+        this.courseList = new ArrayList<>();
+        this.courseList.addAll(other.getCourseList());
+        this.firstName = other.getFirstName();
+        this.lastName = other.getLastName();
+        this.residence = other.getResidence();
+        this.birthday = other.getBirthday();
+    }
+
+    public Teacher(String firstName, String lastName, String residence, LocalDate birthday) {
+        this.courseList = new ArrayList<>();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.residence = residence;
+        this.birthday = birthday;
+    }
 
     public int getId() {
         return id;
