@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -11,7 +12,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
-
 
 <BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unimanagement.CourseOverviewController">
    <center>
@@ -78,7 +78,11 @@
             <Insets right="20.0" />
          </padding>
          <children>
-            <Button mnemonicParsing="false" onAction="#handleBack" text="Back" GridPane.columnIndex="4" />
+            <ButtonBar GridPane.columnIndex="4">
+               <buttons>
+                  <Button mnemonicParsing="false" onAction="#handleBack" text="Back" />
+               </buttons>
+            </ButtonBar>
             <Label text="Avg. Grade: ">
                <font>
                   <Font name="System Bold" size="12.0" />

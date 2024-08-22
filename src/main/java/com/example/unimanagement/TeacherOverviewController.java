@@ -1,27 +1,25 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.entities.Course;
+import com.example.unimanagement.entities.Enrollment;
 import com.example.unimanagement.entities.Teacher;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 public class TeacherOverviewController {
 
@@ -59,17 +57,17 @@ public class TeacherOverviewController {
 
     @FXML
     private void uploadData() {
-        teacherFirstNameLabel.setText(teacher.getFirstName());
-        teacherLastNameLabel.setText(teacher.getLastName());
-
         try (EntityManager em = emf.createEntityManager()) { // Session necessary because of the lazy fetching of courses
             em.getTransaction().begin();
 
             Teacher mergedTeacher = em.merge(teacher);
-            nCoursesLabel.setText(String.valueOf(mergedTeacher.getCourseList().size()));
             courseTable.setItems(FXCollections.observableList(mergedTeacher.getCourseList()));
 
             em.getTransaction().commit();
+
+            teacherFirstNameLabel.setText(teacher.getFirstName());
+            teacherLastNameLabel.setText(teacher.getLastName());
+            nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -103,7 +101,57 @@ public class TeacherOverviewController {
 
     @FXML
     public void handleAdd() {
+        try (EntityManager em = emf.createEntityManager()) {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-add-course-view.fxml"));
+            DialogPane view = loader.load();
+            TeacherAddCourseDialogController controller = loader.getController();
 
+            controller.setCourseList(getUnassignedCourses());
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Add Course");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Course course = em.merge(controller.getNewCourse());
+                course.setTeacher(teacher);
+
+                em.getTransaction().commit();
+                courseTable.getItems().add(course);
+                nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
+                setCourseNStudents();
+            }
+        } catch (NoSuchElementException e) {
+            showNoCourseSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<Course> getUnassignedCourses() {
+        List<Course> courseList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+
+            String jpql = """
+                     SELECT c
+                     FROM Course c
+                     WHERE c.teacher IS NULL
+                    """;
+
+            TypedQuery<Course> q = em.createQuery(jpql, Course.class);
+            courseList = q.getResultList();
+
+            em.getTransaction().commit(); // ends the transaction
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return courseList;
     }
 
     @FXML
@@ -117,6 +165,7 @@ public class TeacherOverviewController {
 
             em.getTransaction().commit();
             courseTable.getItems().remove(selectedIndex);
+            nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
         } catch (Exception e) {

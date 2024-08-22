@@ -85,20 +85,21 @@ public class CourseOverviewController {
      */
     @FXML
     private void uploadData() {
-        courseTitleLabel.setText(course.getName());
-        teacherLabel.setText(course.getTeacherName());
-        avgGradeLabel.setText(getAvgGradeQuery());
-
         try (EntityManager em = emf.createEntityManager()) { // Session necessary because of the lazy fetching of enrollments
             em.getTransaction().begin();
 
             Course mergedCourse = em.merge(course);
-            nStudentsLabel.setText(String.valueOf(mergedCourse.getEnrollmentList().size()));
-            //        nStudentsLabel.setText(getNStudentsQuery());
+//            nStudentsLabel.setText(String.valueOf(mergedCourse.getEnrollmentList().size()));
+//            nStudentsLabel.setText(getNStudentsQuery());
             enrollmentTable.setItems(FXCollections.observableList(mergedCourse.getEnrollmentList()));
-            //        enrollmentTable.setItems(getEnrollmentData());
+//            enrollmentTable.setItems(getEnrollmentData());
 
             em.getTransaction().commit();
+
+            courseTitleLabel.setText(course.getName());
+            teacherLabel.setText(course.getTeacherName());
+            avgGradeLabel.setText(getAvgGradeQuery());
+            nStudentsLabel.setText(String.valueOf(enrollmentTable.getItems().size()));
         } catch (Exception e) {
             e.printStackTrace();
         }
