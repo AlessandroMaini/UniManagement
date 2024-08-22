@@ -63,24 +63,4 @@ public class Enrollment {
     public void setCourse(Course course) {
         this.course = course;
     }
-
-    public String getStudentSerial() {
-        return student.getSerial();
-    }
-
-    public String getStudentFirstName() {
-        return student.getFirstName();
-    }
-
-    public String getStudentLastName() {
-        return student.getLastName();
-    }
-
-    public String getStudentResidence() {
-        return student.getResidence();
-    }
-
-    public LocalDate getStudentBirthday() {
-        return student.getBirthday();
-    }
 }

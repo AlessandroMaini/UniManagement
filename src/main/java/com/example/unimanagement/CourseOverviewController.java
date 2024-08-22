@@ -5,6 +5,8 @@ import com.example.unimanagement.entities.Enrollment;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,6 +19,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class CourseOverviewController {
@@ -44,11 +47,26 @@ public class CourseOverviewController {
     @FXML
     public void initialize() {
 
-        enrollmentSerialColumn.setCellValueFactory(new PropertyValueFactory<>("studentSerial"));
-        enrollmentFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("studentFirstName"));
-        enrollmentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("studentLastName"));
-        enrollmentResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("studentResidence"));
-        enrollmentBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("studentBirthday"));
+        enrollmentSerialColumn.setCellValueFactory(cellData -> {
+            Enrollment enrollment = cellData.getValue();
+            return new SimpleStringProperty(enrollment.getStudent().getSerial());
+        });
+        enrollmentFirstNameColumn.setCellValueFactory(cellData -> {
+            Enrollment enrollment = cellData.getValue();
+            return new SimpleStringProperty(enrollment.getStudent().getFirstName());
+        });
+        enrollmentLastNameColumn.setCellValueFactory(cellData -> {
+            Enrollment enrollment = cellData.getValue();
+            return new SimpleStringProperty(enrollment.getStudent().getLastName());
+        });
+        enrollmentResidenceColumn.setCellValueFactory(cellData -> {
+            Enrollment enrollment = cellData.getValue();
+            return new SimpleStringProperty(enrollment.getStudent().getResidence());
+        });
+        enrollmentBirthdayColumn.setCellValueFactory(cellData -> {
+            Enrollment enrollment = cellData.getValue();
+            return new SimpleObjectProperty<>(enrollment.getStudent().getBirthday());
+        });
         enrollmentExaminationDateColumn.setCellValueFactory(new PropertyValueFactory<>("examinationDate"));
         enrollmentGradeColumn.setCellValueFactory(new PropertyValueFactory<>("grade"));
     }
@@ -67,12 +85,23 @@ public class CourseOverviewController {
      */
     @FXML
     private void uploadData() {
-        courseTitleLabel.setText(this.course.getName());
-        teacherLabel.setText(this.course.getTeacherName());
+        courseTitleLabel.setText(course.getName());
+        teacherLabel.setText(course.getTeacherName());
         avgGradeLabel.setText(getAvgGradeQuery());
-        nStudentsLabel.setText(getNStudentsQuery());
 
-        enrollmentTable.setItems(getEnrollmentData());
+        try (EntityManager em = emf.createEntityManager()) { // Session necessary because of the lazy fetching of enrollments
+            em.getTransaction().begin();
+
+            Course mergedCourse = em.merge(course);
+            nStudentsLabel.setText(String.valueOf(mergedCourse.getEnrollmentList().size()));
+            //        nStudentsLabel.setText(getNStudentsQuery());
+            enrollmentTable.setItems(FXCollections.observableList(mergedCourse.getEnrollmentList()));
+            //        enrollmentTable.setItems(getEnrollmentData());
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -86,12 +115,12 @@ public class CourseOverviewController {
 
             String jpql = """
                      SELECT e
-                     FROM Course c JOIN c.enrollmentList e
-                     WHERE c.id = :courseId
+                     FROM Enrollment e
+                     WHERE e.course = :course
                     """;
 
             TypedQuery<Enrollment> q = em.createQuery(jpql, Enrollment.class);
-            q.setParameter("courseId", course.getId());
+            q.setParameter("course", course);
             enrollmentObservableList = FXCollections.observableList(q.getResultList());
 
             em.getTransaction().commit(); // ends the transaction
@@ -112,12 +141,12 @@ public class CourseOverviewController {
 
             String jpql = """
                     SELECT COUNT(e)
-                    FROM Course c JOIN c.enrollmentList e
-                    WHERE c.id = :courseId
+                    FROM Enrollment e
+                    WHERE e.course = :course
                     """;
 
             TypedQuery<Long> q = em.createQuery(jpql, Long.class);
-            q.setParameter("courseId", course.getId());
+            q.setParameter("course", course);
             Long count = q.getSingleResult();
 
             em.getTransaction().commit();
@@ -139,12 +168,12 @@ public class CourseOverviewController {
 
             String jpql = """
                     SELECT AVG(e.grade)
-                    FROM Course c JOIN c.enrollmentList e
-                    WHERE e.grade IS NOT NULL AND c.id = :courseId
+                    FROM Enrollment e
+                    WHERE e.grade IS NOT NULL AND e.course = :course
                     """;
 
             TypedQuery<Double> q = em.createQuery(jpql, Double.class);
-            q.setParameter("courseId", course.getId());
+            q.setParameter("course", course);
             Double avg = q.getSingleResult();
 
             em.getTransaction().commit();

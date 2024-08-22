@@ -181,6 +181,36 @@ public class GeneralOverviewController {
         teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
         teacherBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
+
+        teacherTable.setRowFactory(tv -> {
+            TableRow<Teacher> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Teacher teacher = row.getItem();
+                    switchToTeacherOverview(teacher);
+                }
+            });
+            return row ;
+        });
+    }
+
+    @FXML
+    private void switchToTeacherOverview(Teacher teacher) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-overview-view.fxml"));
+            Parent root = loader.load();
+
+            TeacherOverviewController controller = loader.getController();
+            controller.setEmf(emf);
+            controller.setTeacher(teacher);
+
+            Stage stage = (Stage) teacherTable.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
