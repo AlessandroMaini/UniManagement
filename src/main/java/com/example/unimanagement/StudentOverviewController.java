@@ -144,10 +144,10 @@ public class StudentOverviewController {
             }
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
+        } catch (InvalidAttributeValueException | NumberFormatException e) {
+            showInvalidAttributeValueAlert();
         } catch (IllegalArgumentException e) {
             showInvalidSelectionAlert();
-        } catch (InvalidAttributeValueException e) {
-            showInvalidAttributeValueAlert();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -172,7 +172,7 @@ public class StudentOverviewController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Enrollment enrollment = new Enrollment(student, controller.getNewCourse());
+                Enrollment enrollment = new Enrollment(em.merge(student), em.merge(controller.getNewCourse()));
                 em.persist(enrollment);
 
                 em.getTransaction().commit();

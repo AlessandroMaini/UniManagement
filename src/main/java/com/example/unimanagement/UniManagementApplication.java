@@ -1,6 +1,7 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +45,7 @@ public class UniManagementApplication extends Application {
         launch(args);
 //        Map<String, String> props = new HashMap<>(); // for hibernate properties
 //        props.put("hibernate.show_sql", "true");
-//        props.put("hibernate.hbm2ddl.auto", "none"); // create recreate a new table for each exec -> NO REAL WORLD!
+//        props.put("hibernate.hbm2ddl.auto", "create"); // create recreate a new table for each exec -> NO REAL WORLD!
 //        EntityManagerFactory entityManagerFactory = new HibernatePersistenceProvider()
 //                .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
 //        try (EntityManager em = entityManagerFactory.createEntityManager()) {

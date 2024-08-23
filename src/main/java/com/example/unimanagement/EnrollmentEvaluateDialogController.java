@@ -15,12 +15,12 @@ public class EnrollmentEvaluateDialogController {
     @FXML private TextField gradeField;
     @FXML private DatePicker examinationDatePicker;
 
-    Integer grade;
+    String grade;
     LocalDate examinationDate;
 
     @FXML
     public void initialize() {
-        gradeField.textProperty().addListener((observable, oldValue, newValue) -> grade = Integer.valueOf(newValue));
+        gradeField.textProperty().addListener((observable, oldValue, newValue) -> grade = newValue);
         examinationDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> examinationDate = newValue);
     }
 
@@ -31,7 +31,7 @@ public class EnrollmentEvaluateDialogController {
     }
 
     public void updateEnrollment(Enrollment enrollment) throws InvalidAttributeValueException {
-        enrollment.setGrade(grade);
+        enrollment.setGrade(Integer.valueOf(grade));
         enrollment.setExaminationDate(examinationDate);
     }
 }

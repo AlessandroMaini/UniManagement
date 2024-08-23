@@ -1,5 +1,6 @@
 package com.example.unimanagement.entities;
 
+import com.example.unimanagement.entities.keys.EnrollmentKey;
 import jakarta.persistence.*;
 
 import javax.management.InvalidAttributeValueException;
@@ -7,23 +8,22 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "enrollments")
+@IdClass(EnrollmentKey.class)
 public class Enrollment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @ManyToOne
+    private Student student;
+
+    @Id
+    @ManyToOne
+    private Course course;
 
     @Column(nullable = true)
     private Integer grade;
 
     @Column(nullable = true)
     private LocalDate examinationDate;
-
-    @ManyToOne
-    private Student student;
-
-    @ManyToOne
-    private Course course;
 
     public Enrollment() {
     }
@@ -37,14 +37,6 @@ public class Enrollment {
 
     public boolean isEvaluated() {
         return !(examinationDate == null || grade == null);
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public Integer getGrade() {
