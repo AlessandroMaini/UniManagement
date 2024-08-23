@@ -7,6 +7,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A university student.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 @Entity
 @Table(name = "students")
 public class Student {
@@ -52,7 +58,7 @@ public class Student {
         if (strNum == null)
             return false;
         try {
-            double d = Double.parseDouble(strNum);
+            Integer.parseInt(strNum);
         } catch (NumberFormatException nfe) {
             return false;
         }
@@ -97,5 +103,10 @@ public class Student {
 
     public void setEnrollmentList(List<Enrollment> enrollmentList) {
         this.enrollmentList = enrollmentList;
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" + "serial='" + serial + '\'' + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\'' + ", residence='" + residence + '\'' + ", birthday=" + birthday + '}';
     }
 }

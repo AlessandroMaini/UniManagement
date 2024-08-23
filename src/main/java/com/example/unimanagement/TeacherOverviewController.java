@@ -19,6 +19,12 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Teacher overview controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class TeacherOverviewController {
 
     @FXML private Label teacherFirstNameLabel;
@@ -32,11 +38,13 @@ public class TeacherOverviewController {
 
     Teacher teacher;
     EntityManagerFactory emf;
-    Map<Course, Long> courseNStudents = new HashMap<>();
+    Map<Course, Long> courseNStudents = new HashMap<>(); // maps: course -> number of students
 
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
-
         courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseNStudentsColumn.setCellValueFactory(cellData -> {
@@ -55,6 +63,9 @@ public class TeacherOverviewController {
         setCourseNStudents();
     }
 
+    /**
+     * Upload the teacher info from the DB and updates the view.
+     */
     @FXML
     private void uploadData() {
         try (EntityManager em = emf.createEntityManager()) { // Session necessary because of the lazy fetching of courses
@@ -73,10 +84,18 @@ public class TeacherOverviewController {
         }
     }
 
+    /**
+     * Populates the (course -> number of students) map.
+     */
     private void setCourseNStudents() {
         courseTable.getItems().forEach(course -> courseNStudents.put(course, getNStudentsFromCourseQuery(course)));
     }
 
+    /**
+     * Returns the number of students in a specified course.
+     * @param course the course we want the number of students
+     * @return the number of students in the course
+     */
     private Long getNStudentsFromCourseQuery(Course course) {
         Long nStudents = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -99,6 +118,9 @@ public class TeacherOverviewController {
         return nStudents;
     }
 
+    /**
+     * Adds a course to the teacher courseList.
+     */
     @FXML
     public void handleAdd() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -133,6 +155,10 @@ public class TeacherOverviewController {
         }
     }
 
+    /**
+     * Returns the unassigned courses.
+     * @return the list of unassigned courses
+     */
     private List<Course> getUnassignedCourses() {
         List<Course> courseList = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -154,6 +180,9 @@ public class TeacherOverviewController {
         return courseList;
     }
 
+    /**
+     * Removes a course from the teacher courseList.
+     */
     @FXML
     public void handleLeave() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -195,7 +224,7 @@ public class TeacherOverviewController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component
+     * Returns the index of the selected item in the TableView component.
      * @return the index of the selected item
      */
     int selectedIndex() {
@@ -207,7 +236,7 @@ public class TeacherOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog in case of no selection
+     * Shows a simple warning dialog in case of no selection.
      */
     void showNoCourseSelectedAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);

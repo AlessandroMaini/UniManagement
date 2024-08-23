@@ -20,6 +20,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
+/**
+ * General overview controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class GeneralOverviewController {
 
     @FXML private TabPane tabPane;
@@ -49,7 +55,6 @@ public class GeneralOverviewController {
      */
     @FXML
     public void initialize() {
-
         initializeStudents();
         initializeTeachers();
         initializeCourses();
@@ -61,7 +66,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Fills the students, courses and teachers tables with the data from the DB
+     * Fills the students, courses and teachers tables with the data from the DB.
      */
     @FXML
     private void fillTables() {
@@ -79,7 +84,7 @@ public class GeneralOverviewController {
             TypedQuery<Student> q = em.createQuery(jpql, Student.class);
             studentObservableList = FXCollections.observableList(q.getResultList());
 
-            em.getTransaction().commit(); // ends the transaction
+            em.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,10 +124,9 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Initializes the students TableView
+     * Initializes the students TableView.
      */
     public void initializeStudents() {
-
         studentSerialColumn.setCellValueFactory(new PropertyValueFactory<>("serial"));
         studentFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         studentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -141,6 +145,10 @@ public class GeneralOverviewController {
         });
     }
 
+    /**
+     * Switches the scene to the student overview.
+     * @param student the student to overview
+     */
     @FXML
     private void switchToStudentOverview(Student student) {
         try {
@@ -161,10 +169,9 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Initializes the courses TableView
+     * Initializes the courses TableView.
      */
     public void initializeCourses() {
-
         courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
@@ -182,7 +189,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Switches the scene to the course overview
+     * Switches the scene to the course overview.
      * @param course the course to overview
      */
     @FXML
@@ -205,10 +212,9 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Initializes the teachers TableView
+     * Initializes the teachers TableView.
      */
     public void initializeTeachers() {
-
         teacherFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
@@ -226,6 +232,10 @@ public class GeneralOverviewController {
         });
     }
 
+    /**
+     * Switches the scene to the teacher overview.
+     * @param teacher the teacher to overview
+     */
     @FXML
     private void switchToTeacherOverview(Teacher teacher) {
         try {
@@ -261,7 +271,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Deletes the selected teacher from the DB
+     * Deletes the selected teacher from the DB.
      */
     private void handleDeleteTeacher() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -284,7 +294,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Deletes the selected course from the DB
+     * Deletes the selected course from the DB.
      */
     private void handleDeleteCourse() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -304,7 +314,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Deletes the selected student from the DB
+     * Deletes the selected student from the DB.
      */
     private void handleDeleteStudent() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -339,7 +349,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Updates the information about the selected teacher
+     * Updates the information about the selected teacher.
      */
     private void handleEditTeacher() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -375,7 +385,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Updates the information about the selected course
+     * Updates the information about the selected course.
      */
     private void handleEditCourse() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -410,7 +420,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Updates the information about the selected student
+     * Updates the information about the selected student.
      */
     private void handleEditStudent() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -463,7 +473,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Adds a new teacher to the DB
+     * Adds a new teacher to the DB.
      */
     private void handleNewTeacher() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -496,7 +506,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Adds a new course to the DB
+     * Adds a new course to the DB.
      */
     private void handleNewCourse() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -529,7 +539,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Adds a new student to the DB
+     * Adds a new student to the DB.
      */
     private void handleNewStudent() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -567,7 +577,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Returns the title of the selected tab
+     * Returns the title of the selected tab.
      * @return the title of the selected tab
      */
     private String getSelectedTab() {
@@ -580,7 +590,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component
+     * Returns the index of the selected item in the TableView component.
      * @param tableView the Table of the selection
      * @return the index of the selected item
      */
@@ -593,7 +603,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog in case of no selection
+     * Shows a simple warning dialog in case of no selection.
      */
     void showNoPersonSelectedAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -604,7 +614,7 @@ public class GeneralOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog in case of wrong attributes
+     * Shows a simple warning dialog in case of wrong attributes.
      */
     void showInvalidAttributeValueAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);

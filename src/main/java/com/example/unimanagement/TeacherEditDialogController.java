@@ -5,6 +5,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 
+/**
+ * Teacher edit controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class TeacherEditDialogController {
 
     @FXML private TextField firstNameField;
@@ -14,6 +20,9 @@ public class TeacherEditDialogController {
 
     Teacher teacher = new Teacher();
 
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
         firstNameField.textProperty().addListener((observable, oldValue, newValue) -> teacher.setFirstName(newValue));
@@ -22,6 +31,10 @@ public class TeacherEditDialogController {
         birthdayPicker.valueProperty().addListener((observable, oldValue, newValue) -> teacher.setBirthday(newValue));
     }
 
+    /**
+     * Updates a teacher with the new values.
+     * @param old the teacher to update
+     */
     public void updateTeacher(Teacher old) {
         old.setFirstName(teacher.getFirstName());
         old.setLastName(teacher.getLastName());
@@ -37,6 +50,10 @@ public class TeacherEditDialogController {
         updateLabels();
     }
 
+    /**
+     * Updates the view with the teacher infos.
+     */
+    @FXML
     private void updateLabels() {
         firstNameField.setText(teacher.getFirstName());
         lastNameField.setText(teacher.getLastName());

@@ -21,6 +21,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Course overview controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class CourseOverviewController {
 
     @FXML private Label courseTitleLabel;
@@ -46,7 +52,6 @@ public class CourseOverviewController {
      */
     @FXML
     public void initialize() {
-
         enrollmentStudentSerialColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getSerial());
@@ -81,7 +86,7 @@ public class CourseOverviewController {
     }
 
     /**
-     * Upload the course info from the DB and updates the view
+     * Upload the course info from the DB and updates the view.
      */
     @FXML
     private void uploadData() {
@@ -96,7 +101,7 @@ public class CourseOverviewController {
 
             em.getTransaction().commit();
 
-            courseCodeLabel.setText(String.valueOf(course.getId()) + ")");
+            courseCodeLabel.setText(course.getId() + ")");
             courseTitleLabel.setText(course.getName());
             teacherLabel.setText(course.getTeacherName());
             avgGradeLabel.setText(getAvgGradeQuery());
@@ -107,7 +112,7 @@ public class CourseOverviewController {
     }
 
     /**
-     * Returns the list of enrollments for the course
+     * Returns the list of enrollments for the course.
      * @return the list of enrollments for the course
      */
     private ObservableList<Enrollment> getEnrollmentData() {
@@ -133,7 +138,7 @@ public class CourseOverviewController {
     }
 
     /**
-     * Returns the number of students in the course
+     * Returns the number of students in the course.
      * @return the number of students in the course
      */
     private String getNStudentsQuery() {
@@ -160,7 +165,7 @@ public class CourseOverviewController {
     }
 
     /**
-     * Returns the average grade of the course exams
+     * Returns the average grade of the course exams.
      * @return the average grade of the course exams
      */
     private String getAvgGradeQuery() {
@@ -190,7 +195,7 @@ public class CourseOverviewController {
     }
 
     /**
-     * Switches the scene to the general overview
+     * Switches the scene to the general overview.
      */
     @FXML
     public void handleBack() {

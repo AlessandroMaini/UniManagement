@@ -6,6 +6,12 @@ import jakarta.persistence.*;
 import javax.management.InvalidAttributeValueException;
 import java.time.LocalDate;
 
+/**
+ * The enrollment of a student in a course (join table).
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 @Entity
 @Table(name = "enrollments")
 @IdClass(EnrollmentKey.class)
@@ -19,10 +25,8 @@ public class Enrollment {
     @ManyToOne
     private Course course;
 
-    @Column(nullable = true)
     private Integer grade;
 
-    @Column(nullable = true)
     private LocalDate examinationDate;
 
     public Enrollment() {
@@ -72,5 +76,10 @@ public class Enrollment {
 
     public void setCourse(Course course) {
         this.course = course;
+    }
+
+    @Override
+    public String toString() {
+        return "Enrollment{" + "student=" + student + ", course=" + course + ", grade=" + grade + ", examinationDate=" + examinationDate + '}';
     }
 }

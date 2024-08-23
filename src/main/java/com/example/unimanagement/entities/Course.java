@@ -1,11 +1,16 @@
 package com.example.unimanagement.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A university course.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 @Entity
 @Table(name = "courses")
 public class Course {
@@ -17,7 +22,7 @@ public class Course {
     private String name;
 
     @ManyToOne
-    private Teacher teacher;
+    private Teacher teacher; // the teacher who holds the course
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollmentList;

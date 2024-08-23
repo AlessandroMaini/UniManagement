@@ -12,6 +12,12 @@ import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Class to configure Hibernate with programmatic approach.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class CustomPersistenceUnitInfo implements PersistenceUnitInfo {
 
     @Override

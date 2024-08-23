@@ -6,6 +6,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A university teacher.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 @Entity
 @Table(name = "teachers")
 public class Teacher {
@@ -15,7 +21,7 @@ public class Teacher {
     private int id;
 
     @OneToMany(mappedBy = "teacher")
-    private List<Course> courseList;
+    private List<Course> courseList; // the courses held by the teacher
 
     private String firstName;
 
@@ -26,16 +32,6 @@ public class Teacher {
     private LocalDate birthday;
 
     public Teacher() {
-    }
-
-    public Teacher(Teacher other) {
-        this.id = other.getId();
-        this.courseList = new ArrayList<>();
-        this.courseList.addAll(other.getCourseList());
-        this.firstName = other.getFirstName();
-        this.lastName = other.getLastName();
-        this.residence = other.getResidence();
-        this.birthday = other.getBirthday();
     }
 
     public Teacher(String firstName, String lastName, String residence, LocalDate birthday) {

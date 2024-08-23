@@ -25,6 +25,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Student overview controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class StudentOverviewController {
 
     @FXML private Label studentFirstNameLabel;
@@ -41,9 +47,11 @@ public class StudentOverviewController {
     Student student;
     EntityManagerFactory emf;
 
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
-
         enrollmentCourseCodeColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleObjectProperty<>(enrollment.getCourse().getId());
@@ -65,9 +73,12 @@ public class StudentOverviewController {
         uploadData();
     }
 
+    /**
+     * Upload the student info from the DB and updates the view.
+     */
     @FXML
     private void uploadData() {
-        try (EntityManager em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) { // Session necessary because of the lazy fetching of enrollments
             em.getTransaction().begin();
 
             Student mergedStudent = em.merge(student);
@@ -84,6 +95,10 @@ public class StudentOverviewController {
         }
     }
 
+    /**
+     * Returns the average grade of the student.
+     * @return the average grade of the student
+     */
     private String getAvgGradeQuery() {
         String avgGrade = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -110,6 +125,9 @@ public class StudentOverviewController {
         return avgGrade;
     }
 
+    /**
+     * Adds a valuation to the student's selected enrollment.
+     */
     @FXML
     public void handleEvaluate() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -153,6 +171,9 @@ public class StudentOverviewController {
         }
     }
 
+    /**
+     * Enrolls the student to a new course.
+     */
     @FXML
     public void handleEnroll() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -185,6 +206,10 @@ public class StudentOverviewController {
         }
     }
 
+    /**
+     * Returns the courses in which the student is not enrolled.
+     * @return the list the courses in which the student is not enrolled
+     */
     private List<Course> getNotEnrolledCourses() {
         List<Course> courseList = null;
         try (EntityManager em = emf.createEntityManager()) {
@@ -210,6 +235,9 @@ public class StudentOverviewController {
         return courseList;
     }
 
+    /**
+     * Drops a student enrollment.
+     */
     @FXML
     public void handleDrop() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -235,7 +263,7 @@ public class StudentOverviewController {
     }
 
     /**
-     * Switches the scene to the general overview
+     * Switches the scene to the general overview.
      */
     @FXML
     public void handleBack() {
@@ -256,7 +284,7 @@ public class StudentOverviewController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component
+     * Returns the index of the selected item in the TableView component.
      * @return the index of the selected item
      */
     int selectedIndex() {
@@ -268,7 +296,7 @@ public class StudentOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog in case of no selection
+     * Shows a simple warning dialog in case of no selection.
      */
     void showNoCourseSelectedAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -278,6 +306,9 @@ public class StudentOverviewController {
         alert.showAndWait();
     }
 
+    /**
+     * Shows a simple warning dialog in case of wrong selection.
+     */
     void showInvalidSelectionAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Invalid Selection");
@@ -287,7 +318,7 @@ public class StudentOverviewController {
     }
 
     /**
-     * Shows a simple warning dialog in case of wrong attributes
+     * Shows a simple warning dialog in case of wrong attributes.
      */
     void showInvalidAttributeValueAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);

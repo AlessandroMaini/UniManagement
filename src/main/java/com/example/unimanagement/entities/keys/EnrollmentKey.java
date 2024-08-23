@@ -6,7 +6,14 @@ import com.example.unimanagement.entities.Student;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * The primary key of enrollment.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class EnrollmentKey implements Serializable {
+
     private Course course;
     private Student student;
 

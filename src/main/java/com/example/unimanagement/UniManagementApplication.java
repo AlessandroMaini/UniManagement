@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class UniManagementApplication extends Application {
 
-    private EntityManagerFactory emf;
+    private EntityManagerFactory emf; // unique instance of EntityManagerFactory
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -35,6 +35,9 @@ public class UniManagementApplication extends Application {
         stage.show();
     }
 
+    /**
+     * Closes all connections to the DB
+     */
     @Override
     public void stop() {
         if (emf != null && emf.isOpen())
@@ -45,10 +48,10 @@ public class UniManagementApplication extends Application {
         launch(args);
 //        Map<String, String> props = new HashMap<>(); // for hibernate properties
 //        props.put("hibernate.show_sql", "true");
-//        props.put("hibernate.hbm2ddl.auto", "create"); // create recreate a new table for each exec -> NO REAL WORLD!
-//        EntityManagerFactory entityManagerFactory = new HibernatePersistenceProvider()
+//        props.put("hibernate.hbm2ddl.auto", "create");
+//        EntityManagerFactory emf = new HibernatePersistenceProvider()
 //                .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-//        try (EntityManager em = entityManagerFactory.createEntityManager()) {
+//        try (EntityManager em = emf.createEntityManager()) {
 //            em.getTransaction().begin();
 //
 //

@@ -8,6 +8,12 @@ import javafx.scene.control.TextField;
 import javax.management.InvalidAttributeValueException;
 import java.time.LocalDate;
 
+/**
+ * Enrollment evaluation controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class EnrollmentEvaluateDialogController {
 
     @FXML private TextField studentField;
@@ -18,6 +24,9 @@ public class EnrollmentEvaluateDialogController {
     String grade;
     LocalDate examinationDate;
 
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
         gradeField.textProperty().addListener((observable, oldValue, newValue) -> grade = newValue);
@@ -30,6 +39,11 @@ public class EnrollmentEvaluateDialogController {
         examinationDatePicker.setValue(LocalDate.now());
     }
 
+    /**
+     * Updates an enrollment with the evaluation.
+     * @param enrollment the enrollment to evaluate
+     * @throws InvalidAttributeValueException in case of wrong grade
+     */
     public void updateEnrollment(Enrollment enrollment) throws InvalidAttributeValueException {
         enrollment.setGrade(Integer.valueOf(grade));
         enrollment.setExaminationDate(examinationDate);

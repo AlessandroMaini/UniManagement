@@ -1,13 +1,18 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.entities.Student;
-import com.example.unimanagement.entities.Teacher;
 import javafx.fxml.FXML;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 
 import javax.management.InvalidAttributeValueException;
 
+/**
+ * Student edit controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-23
+ */
 public class StudentEditDialogController {
 
     @FXML private TextField serialField;
@@ -19,6 +24,9 @@ public class StudentEditDialogController {
     Student student = new Student();
     String serial;
 
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
     @FXML
     public void initialize() {
         firstNameField.textProperty().addListener((observable, oldValue, newValue) -> student.setFirstName(newValue));
@@ -27,16 +35,27 @@ public class StudentEditDialogController {
         birthdayPicker.valueProperty().addListener((observable, oldValue, newValue) -> student.setBirthday(newValue));
     }
 
+    /**
+     * Initializes the controller in case of edit.
+     */
     @FXML
     public void initializeEdit(){
         serialField.editableProperty().set(false);
     }
 
+    /**
+     * Initializes the controller in case of new.
+     */
     @FXML
     public void initializeNew() {
         serialField.textProperty().addListener((observable, oldValue, newValue) -> serial = newValue);
     }
 
+    /**
+     * Updates a student with the new values.
+     * @param old the student to update
+     * @throws InvalidAttributeValueException in case of wrong serial
+     */
     public void updateStudent(Student old) throws InvalidAttributeValueException {
         old.setSerial(serial);
         old.setFirstName(student.getFirstName());
@@ -54,6 +73,10 @@ public class StudentEditDialogController {
         updateLabels();
     }
 
+    /**
+     * Updates the view with the student infos.
+     */
+    @FXML
     private void updateLabels() {
         serialField.setText(serial);
         firstNameField.setText(student.getFirstName());
