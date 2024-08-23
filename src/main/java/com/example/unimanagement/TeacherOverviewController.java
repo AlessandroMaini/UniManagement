@@ -28,6 +28,7 @@ public class TeacherOverviewController {
     @FXML private Label nCoursesLabel;
 
     @FXML private TableView<Course> courseTable;
+    @FXML private TableColumn<Course, Integer> courseCodeColumn;
     @FXML private TableColumn<Course, String> courseNameColumn;
     @FXML private TableColumn<Course, Long> courseNStudentsColumn;
 
@@ -38,6 +39,7 @@ public class TeacherOverviewController {
     @FXML
     public void initialize() {
 
+        courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseNStudentsColumn.setCellValueFactory(cellData -> {
             Course course = cellData.getValue();

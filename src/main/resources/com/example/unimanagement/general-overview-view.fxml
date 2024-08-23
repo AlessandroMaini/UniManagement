@@ -9,7 +9,6 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unimanagement.GeneralOverviewController">
    <center>
       <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
@@ -34,6 +33,7 @@
                <content>
                   <TableView fx:id="courseTable" prefHeight="200.0" prefWidth="200.0">
                     <columns>
+                        <TableColumn fx:id="courseCodeColumn" prefWidth="75.0" text="Code" />
                       <TableColumn fx:id="courseNameColumn" prefWidth="75.0" text="Name" />
                       <TableColumn fx:id="courseTeacherColumn" prefWidth="75.0" text="Teacher" />
                     </columns>

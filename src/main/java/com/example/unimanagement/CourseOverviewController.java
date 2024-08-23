@@ -19,7 +19,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 public class CourseOverviewController {
@@ -28,13 +27,14 @@ public class CourseOverviewController {
     @FXML private Label teacherLabel;
     @FXML private Label avgGradeLabel;
     @FXML private Label nStudentsLabel;
+    @FXML private Label courseCodeLabel;
 
     @FXML private TableView<Enrollment> enrollmentTable;
-    @FXML private TableColumn<Enrollment, String> enrollmentSerialColumn;
-    @FXML private TableColumn<Enrollment, String> enrollmentFirstNameColumn;
-    @FXML private TableColumn<Enrollment, String> enrollmentLastNameColumn;
-    @FXML private TableColumn<Enrollment, String> enrollmentResidenceColumn;
-    @FXML private TableColumn<Enrollment, LocalDate> enrollmentBirthdayColumn;
+    @FXML private TableColumn<Enrollment, String> enrollmentStudentSerialColumn;
+    @FXML private TableColumn<Enrollment, String> enrollmentStudentFirstNameColumn;
+    @FXML private TableColumn<Enrollment, String> enrollmentStudentLastNameColumn;
+    @FXML private TableColumn<Enrollment, String> enrollmentStudentResidenceColumn;
+    @FXML private TableColumn<Enrollment, LocalDate> enrollmentStudentBirthdayColumn;
     @FXML private TableColumn<Enrollment, Optional<LocalDate>> enrollmentExaminationDateColumn;
     @FXML private TableColumn<Enrollment, Optional<Integer>> enrollmentGradeColumn;
 
@@ -47,23 +47,23 @@ public class CourseOverviewController {
     @FXML
     public void initialize() {
 
-        enrollmentSerialColumn.setCellValueFactory(cellData -> {
+        enrollmentStudentSerialColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getSerial());
         });
-        enrollmentFirstNameColumn.setCellValueFactory(cellData -> {
+        enrollmentStudentFirstNameColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getFirstName());
         });
-        enrollmentLastNameColumn.setCellValueFactory(cellData -> {
+        enrollmentStudentLastNameColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getLastName());
         });
-        enrollmentResidenceColumn.setCellValueFactory(cellData -> {
+        enrollmentStudentResidenceColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getResidence());
         });
-        enrollmentBirthdayColumn.setCellValueFactory(cellData -> {
+        enrollmentStudentBirthdayColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleObjectProperty<>(enrollment.getStudent().getBirthday());
         });
@@ -96,6 +96,7 @@ public class CourseOverviewController {
 
             em.getTransaction().commit();
 
+            courseCodeLabel.setText(String.valueOf(course.getId()) + ")");
             courseTitleLabel.setText(course.getName());
             teacherLabel.setText(course.getTeacherName());
             avgGradeLabel.setText(getAvgGradeQuery());

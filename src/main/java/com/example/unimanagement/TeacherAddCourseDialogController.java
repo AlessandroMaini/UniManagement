@@ -15,10 +15,12 @@ import java.util.NoSuchElementException;
 public class TeacherAddCourseDialogController {
 
     @FXML private TableView<Course> courseTable;
+    @FXML private TableColumn<Course, Integer> courseCodeColumn;
     @FXML private TableColumn<Course, String> courseNameColumn;
 
     @FXML
     public void initialize() {
+        courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
     }
 

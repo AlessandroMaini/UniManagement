@@ -32,6 +32,7 @@ public class GeneralOverviewController {
     @FXML private TableColumn<Student, LocalDate> studentBirthdayColumn;
 
     @FXML private TableView<Course> courseTable;
+    @FXML private TableColumn<Course, Integer> courseCodeColumn;
     @FXML private TableColumn<Course, String> courseNameColumn;
     @FXML private TableColumn<Course, String> courseTeacherColumn;
 
@@ -127,6 +128,36 @@ public class GeneralOverviewController {
         studentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         studentResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
         studentBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
+
+        studentTable.setRowFactory(tv -> {
+            TableRow<Student> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Student student = row.getItem();
+                    switchToStudentOverview(student);
+                }
+            });
+            return row ;
+        });
+    }
+
+    @FXML
+    private void switchToStudentOverview(Student student) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("student-overview-view.fxml"));
+            Parent root = loader.load();
+
+            StudentOverviewController controller = loader.getController();
+            controller.setEmf(emf);
+            controller.setStudent(student);
+
+            Stage stage = (Stage) studentTable.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -134,6 +165,7 @@ public class GeneralOverviewController {
      */
     public void initializeCourses() {
 
+        courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
 

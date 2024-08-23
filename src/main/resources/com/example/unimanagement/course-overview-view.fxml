@@ -19,11 +19,11 @@
          <children>
             <TableView fx:id="enrollmentTable" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn fx:id="enrollmentSerialColumn" prefWidth="75.0" text="Serial" />
-                <TableColumn fx:id="enrollmentFirstNameColumn" prefWidth="75.0" text="First Name" />
-                  <TableColumn fx:id="enrollmentLastNameColumn" prefWidth="75.0" text="Last Name" />
-                  <TableColumn fx:id="enrollmentResidenceColumn" prefWidth="75.0" text="Residence" />
-                  <TableColumn fx:id="enrollmentBirthdayColumn" prefWidth="75.0" text="Birthday" />
+                <TableColumn fx:id="enrollmentStudentSerialColumn" prefWidth="75.0" text="Serial" />
+                <TableColumn fx:id="enrollmentStudentFirstNameColumn" prefWidth="75.0" text="First Name" />
+                  <TableColumn fx:id="enrollmentStudentLastNameColumn" prefWidth="75.0" text="Last Name" />
+                  <TableColumn fx:id="enrollmentStudentResidenceColumn" prefWidth="75.0" text="Residence" />
+                  <TableColumn fx:id="enrollmentStudentBirthdayColumn" prefWidth="75.0" text="Birthday" />
                   <TableColumn fx:id="enrollmentExaminationDateColumn" prefWidth="75.0" text="Examination Date" />
                   <TableColumn fx:id="enrollmentGradeColumn" prefWidth="75.0" text="Grade" />
               </columns>
@@ -37,7 +37,8 @@
    <top>
       <GridPane BorderPane.alignment="CENTER">
         <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="600.0" />
+            <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+          <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="0.0" />
           <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="7.0" />
         </columnConstraints>
@@ -45,21 +46,29 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label fx:id="courseTitleLabel" text="Label" GridPane.halignment="CENTER">
+            <Label fx:id="courseTitleLabel" text="Label" GridPane.columnIndex="1">
                <font>
                   <Font name="System Bold" size="18.0" />
                </font>
+               <GridPane.margin>
+                  <Insets left="5.0" />
+               </GridPane.margin>
             </Label>
-            <Label fx:id="teacherLabel" text="Label" GridPane.columnIndex="2" />
-            <Label text="Teacher: " GridPane.columnIndex="1">
+            <Label fx:id="teacherLabel" text="Label" GridPane.columnIndex="3" />
+            <Label text="Teacher: " GridPane.columnIndex="2">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font>
             </Label>
+            <Label fx:id="courseCodeLabel" text="Label">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
          </children>
-         <padding>
-            <Insets right="10.0" />
-         </padding>
       </GridPane>
    </top>
    <bottom>

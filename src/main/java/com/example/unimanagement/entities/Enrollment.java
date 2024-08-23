@@ -24,6 +24,10 @@ public class Enrollment {
     @ManyToOne
     private Course course;
 
+    public boolean isEvaluated() {
+        return examinationDate == null || grade == null;
+    }
+
     public int getId() {
         return id;
     }
