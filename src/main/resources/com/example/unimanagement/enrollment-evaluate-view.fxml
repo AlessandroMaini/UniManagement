@@ -10,15 +10,15 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unimanagement.TeacherEditDialogController">
+<DialogPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unimanagement.EnrollmentEvaluateDialogController">
     <expandableContent>
       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="320.0" />
     </expandableContent>
    <content>
       <GridPane>
         <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="225.0" minWidth="10.0" prefWidth="97.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="363.0" minWidth="10.0" prefWidth="337.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="337.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -27,14 +27,14 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label text="First Name" />
-            <Label text="Last Name" GridPane.rowIndex="1" />
-            <Label text="Residence" GridPane.rowIndex="2" />
-            <Label text="Birthday" GridPane.rowIndex="3" />
-            <TextField fx:id="firstNameField" GridPane.columnIndex="1" />
-            <TextField fx:id="lastNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField fx:id="residenceField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <DatePicker fx:id="birthdayPicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Student" />
+            <Label text="Course" GridPane.rowIndex="1" />
+            <Label text="Grade" GridPane.rowIndex="2" />
+            <Label text="Examination Date" GridPane.rowIndex="3" />
+            <TextField fx:id="studentField" editable="false" GridPane.columnIndex="1" />
+            <TextField fx:id="courseFiled" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="gradeField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <DatePicker fx:id="examinationDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
          </children>
       </GridPane>
    </content>

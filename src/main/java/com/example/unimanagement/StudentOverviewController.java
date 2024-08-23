@@ -1,5 +1,6 @@
 package com.example.unimanagement;
 
+import com.example.unimanagement.entities.Course;
 import com.example.unimanagement.entities.Enrollment;
 import com.example.unimanagement.entities.Student;
 import jakarta.persistence.EntityManager;
@@ -12,15 +13,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javax.management.InvalidAttributeValueException;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -110,6 +111,106 @@ public class StudentOverviewController {
     }
 
     @FXML
+    public void handleEvaluate() {
+        try (EntityManager em = emf.createEntityManager()) {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("enrollment-evaluate-view.fxml"));
+            DialogPane view = loader.load();
+            EnrollmentEvaluateDialogController controller = loader.getController();
+
+            int selectedIndex = selectedIndex();
+            Enrollment enrollment = enrollmentTable.getItems().get(selectedIndex);
+            if (enrollment.isEvaluated())
+                throw new IllegalArgumentException();
+            controller.setEnrollment(enrollment);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Evaluate");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Enrollment mergedEnrollment = em.merge(enrollment);
+                controller.updateEnrollment(mergedEnrollment);
+
+                Student mergedStudent = em.merge(student);
+                enrollmentTable.setItems(FXCollections.observableList(mergedStudent.getEnrollmentList()));
+
+                em.getTransaction().commit();
+                avgGradeLabel.setText(getAvgGradeQuery());
+            }
+        } catch (NoSuchElementException e) {
+            showNoCourseSelectedAlert();
+        } catch (IllegalArgumentException e) {
+            showInvalidSelectionAlert();
+        } catch (InvalidAttributeValueException e) {
+            showInvalidAttributeValueAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void handleEnroll() {
+        try (EntityManager em = emf.createEntityManager()) {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("course-add-view.fxml"));
+            DialogPane view = loader.load();
+            CourseAddDialogController controller = loader.getController();
+
+            controller.setCourseList(getNotEnrolledCourses());
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Enroll");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Enrollment enrollment = new Enrollment(student, controller.getNewCourse());
+                em.persist(enrollment);
+
+                em.getTransaction().commit();
+                enrollmentTable.getItems().add(enrollment);
+            }
+        } catch (NoSuchElementException e) {
+            showNoCourseSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<Course> getNotEnrolledCourses() {
+        List<Course> courseList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+
+            String jpql = """
+                     SELECT c
+                     FROM Course c
+                     WHERE c NOT IN (   SELECT e.course
+                                        FROM Enrollment e
+                                        WHERE e.student = :student
+                                    )
+                    """;
+
+            TypedQuery<Course> q = em.createQuery(jpql, Course.class);
+            q.setParameter("student", student);
+            courseList = q.getResultList();
+
+            em.getTransaction().commit(); // ends the transaction
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return courseList;
+    }
+
+    @FXML
     public void handleDrop() {
         try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex();
@@ -177,11 +278,22 @@ public class StudentOverviewController {
         alert.showAndWait();
     }
 
-    private void showInvalidSelectionAlert() {
+    void showInvalidSelectionAlert() {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Invalid Selection");
-        alert.setHeaderText("Cannot Drop this Course");
+        alert.setHeaderText("Cannot Drop nor Evaluate this Course");
         alert.setContentText("Please select a course with no evaluation.");
+        alert.showAndWait();
+    }
+
+    /**
+     * Shows a simple warning dialog in case of wrong attributes
+     */
+    void showInvalidAttributeValueAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Invalid Grade");
+        alert.setHeaderText("Invalid Grade");
+        alert.setContentText("Please select a grade between 18 and 30.");
         alert.showAndWait();
     }
 }

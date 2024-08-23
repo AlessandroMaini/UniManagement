@@ -1,14 +1,12 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.entities.Course;
-import com.example.unimanagement.entities.Enrollment;
 import com.example.unimanagement.entities.Teacher;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -105,9 +103,9 @@ public class TeacherOverviewController {
     public void handleAdd() {
         try (EntityManager em = emf.createEntityManager()) {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("teacher-add-course-view.fxml"));
+            loader.setLocation(getClass().getResource("course-add-view.fxml"));
             DialogPane view = loader.load();
-            TeacherAddCourseDialogController controller = loader.getController();
+            CourseAddDialogController controller = loader.getController();
 
             controller.setCourseList(getUnassignedCourses());
 

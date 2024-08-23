@@ -2,6 +2,7 @@ package com.example.unimanagement.entities;
 
 import jakarta.persistence.*;
 
+import javax.management.InvalidAttributeValueException;
 import java.time.LocalDate;
 
 @Entity
@@ -24,8 +25,18 @@ public class Enrollment {
     @ManyToOne
     private Course course;
 
+    public Enrollment() {
+    }
+
+    public Enrollment(Student student, Course course) {
+        this.student = student;
+        this.course = course;
+        this.examinationDate = null;
+        this.grade = null;
+    }
+
     public boolean isEvaluated() {
-        return examinationDate == null || grade == null;
+        return !(examinationDate == null || grade == null);
     }
 
     public int getId() {
@@ -40,8 +51,11 @@ public class Enrollment {
         return grade;
     }
 
-    public void setGrade(Integer grade) {
-        this.grade = grade;
+    public void setGrade(Integer grade) throws InvalidAttributeValueException {
+        if (grade < 18 || grade > 30)
+            throw new InvalidAttributeValueException();
+        else
+            this.grade = grade;
     }
 
     public LocalDate getExaminationDate() {
