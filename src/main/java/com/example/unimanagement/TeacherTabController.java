@@ -1,0 +1,217 @@
+package com.example.unimanagement;
+
+import com.example.unimanagement.entities.Course;
+import com.example.unimanagement.entities.Teacher;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.TypedQuery;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+public class TeacherTabController {
+
+    @FXML private TableView<Teacher> teacherTable;
+    @FXML private TableColumn<Teacher, String> teacherFirstNameColumn;
+    @FXML private TableColumn<Teacher, String> teacherLastNameColumn;
+    @FXML private TableColumn<Teacher, String> teacherResidenceColumn;
+    @FXML private TableColumn<Teacher, LocalDate> teacherBirthdayColumn;
+
+    EntityManagerFactory emf;
+    CourseTabController courseController; // reference necessary to update the course teacher column
+
+    /**
+     * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
+     */
+    @FXML
+    public void initialize() {
+        teacherFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
+        teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
+        teacherBirthdayColumn.setCellValueFactory(new PropertyValueFactory<>("birthday"));
+
+        teacherTable.setRowFactory(tv -> {
+            TableRow<Teacher> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty()) ) {
+                    Teacher teacher = row.getItem();
+                    switchToTeacherOverview(teacher);
+                }
+            });
+            return row ;
+        });
+    }
+
+    /**
+     * Switches the scene to the teacher overview.
+     * @param teacher the teacher to overview
+     */
+    @FXML
+    private void switchToTeacherOverview(Teacher teacher) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-overview-view.fxml"));
+            Parent root = loader.load();
+
+            TeacherOverviewController controller = loader.getController();
+            controller.setEmf(emf);
+            controller.setTeacher(teacher);
+
+            Stage stage = (Stage) teacherTable.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setEmf(EntityManagerFactory emf) {
+        this.emf = emf;
+        fillTeacherTable();
+    }
+
+    public void setCourseController(CourseTabController courseController) {
+        this.courseController = courseController;
+    }
+
+    public void fillTeacherTable() {
+        teacherTable.setItems(getTeacherData());
+    }
+
+    private ObservableList<Teacher> getTeacherData() {
+        ObservableList<Teacher> teacherObservableList = null;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+
+            String jpql = "SELECT t FROM Teacher t";
+            TypedQuery<Teacher> q = em.createQuery(jpql, Teacher.class);
+            teacherObservableList = FXCollections.observableList(q.getResultList());
+
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return teacherObservableList;
+    }
+
+    @FXML
+    void handleDelete() {
+        try (EntityManager em = emf.createEntityManager()) {
+            int selectedIndex = selectedIndex();
+            em.getTransaction().begin();
+
+            Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
+            for (Course c : t.getCourseList())
+                c.setTeacher(null);
+            em.remove(t);
+
+            em.getTransaction().commit();
+            courseController.fillCourseTable();
+            teacherTable.getItems().remove(selectedIndex);
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void handleEdit() {
+        try (EntityManager em = emf.createEntityManager()) {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
+            DialogPane view = loader.load();
+            TeacherEditDialogController controller = loader.getController();
+
+            int selectedIndex = selectedIndex();
+            controller.setTeacher(teacherTable.getItems().get(selectedIndex));
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Edit Teacher");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
+                controller.updateTeacher(t);
+
+                em.getTransaction().commit();
+                courseController.fillCourseTable();
+                teacherTable.setItems(getTeacherData());
+            }
+        } catch (NoSuchElementException e) {
+            showNoPersonSelectedAlert();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void handleNew() {
+        try (EntityManager em = emf.createEntityManager()) {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getResource("teacher-edit-view.fxml"));
+            DialogPane view = loader.load();
+            TeacherEditDialogController controller = loader.getController();
+
+            Teacher newTeacher = new Teacher("First Name", "Last Name", "Residence", LocalDate.now());
+            controller.setTeacher(newTeacher);
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("New Teacher");
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setDialogPane(view);
+
+            Optional<ButtonType> clickedButton = dialog.showAndWait();
+            if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                em.getTransaction().begin();
+
+                controller.updateTeacher(newTeacher);
+                em.persist(newTeacher);
+
+                em.getTransaction().commit();
+                teacherTable.getItems().add(newTeacher);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Returns the index of the selected item in the TableView component.
+     * @return the index of the selected item
+     */
+    int selectedIndex() {
+        int selectedIndex = teacherTable.getSelectionModel().getSelectedIndex();
+        if (selectedIndex < 0) {
+            throw new NoSuchElementException();
+        }
+        return selectedIndex;
+    }
+
+    /**
+     * Shows a simple warning dialog in case of no selection.
+     */
+    void showNoPersonSelectedAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("No Selection");
+        alert.setHeaderText("Nothing Selected");
+        alert.setContentText("Please select something in the table.");
+        alert.showAndWait();
+    }
+}

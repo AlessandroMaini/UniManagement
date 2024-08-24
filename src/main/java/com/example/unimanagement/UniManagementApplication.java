@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class UniManagementApplication extends Application {
 
-    private EntityManagerFactory emf; // unique instance of EntityManagerFactory
+    private static EntityManagerFactory emf; // unique instance of EntityManagerFactory
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -49,7 +49,7 @@ public class UniManagementApplication extends Application {
 //        Map<String, String> props = new HashMap<>(); // for hibernate properties
 //        props.put("hibernate.show_sql", "true");
 //        props.put("hibernate.hbm2ddl.auto", "create");
-//        EntityManagerFactory emf = new HibernatePersistenceProvider()
+//        emf = new HibernatePersistenceProvider()
 //                .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
 //        try (EntityManager em = emf.createEntityManager()) {
 //            em.getTransaction().begin();
