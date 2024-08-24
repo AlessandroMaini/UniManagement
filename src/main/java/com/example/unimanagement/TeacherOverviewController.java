@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -37,14 +38,16 @@ public class TeacherOverviewController {
     @FXML private TableColumn<Course, Long> courseNStudentsColumn;
 
     Teacher teacher;
-    EntityManagerFactory emf;
+    ObservableList<Course> courseObservableList = FXCollections.observableArrayList();
     Map<Course, Long> courseNStudents = new HashMap<>(); // maps: course -> number of students
+    EntityManagerFactory emf;
 
     /**
      * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
      */
     @FXML
     public void initialize() {
+        courseTable.setItems(courseObservableList);
         courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseNStudentsColumn.setCellValueFactory(cellData -> {
@@ -72,13 +75,13 @@ public class TeacherOverviewController {
             em.getTransaction().begin();
 
             Teacher mergedTeacher = em.merge(teacher);
-            courseTable.setItems(FXCollections.observableList(mergedTeacher.getCourseList()));
+            courseObservableList.addAll(mergedTeacher.getCourseList());
 
             em.getTransaction().commit();
 
             teacherFirstNameLabel.setText(teacher.getFirstName());
             teacherLastNameLabel.setText(teacher.getLastName());
-            nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
+            nCoursesLabel.setText(String.valueOf(courseObservableList.size()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,7 +91,7 @@ public class TeacherOverviewController {
      * Populates the (course -> number of students) map.
      */
     private void setCourseNStudents() {
-        courseTable.getItems().forEach(course -> courseNStudents.put(course, getNStudentsFromCourseQuery(course)));
+        courseObservableList.forEach(course -> courseNStudents.put(course, getNStudentsFromCourseQuery(course)));
     }
 
     /**
@@ -144,8 +147,8 @@ public class TeacherOverviewController {
                 course.setTeacher(teacher);
 
                 em.getTransaction().commit();
-                courseTable.getItems().add(course);
-                nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
+                courseObservableList.add(course);
+                nCoursesLabel.setText(String.valueOf(courseObservableList.size()));
                 setCourseNStudents();
             }
         } catch (NoSuchElementException e) {
@@ -189,12 +192,12 @@ public class TeacherOverviewController {
             int selectedIndex = selectedIndex();
             em.getTransaction().begin();
 
-            Course course = em.merge(courseTable.getItems().get(selectedIndex));
+            Course course = em.merge(courseObservableList.get(selectedIndex));
             course.setTeacher(null);
 
             em.getTransaction().commit();
-            courseTable.getItems().remove(selectedIndex);
-            nCoursesLabel.setText(String.valueOf(courseTable.getItems().size()));
+            courseObservableList.remove(selectedIndex);
+            nCoursesLabel.setText(String.valueOf(courseObservableList.size()));
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
         } catch (Exception e) {

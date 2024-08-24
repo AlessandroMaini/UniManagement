@@ -45,6 +45,7 @@ public class CourseOverviewController {
     @FXML private TableColumn<Enrollment, Optional<Integer>> enrollmentGradeColumn;
 
     Course course;
+    ObservableList<Enrollment> enrollmentObservableList = FXCollections.observableArrayList();
     EntityManagerFactory emf;
 
     /**
@@ -52,6 +53,7 @@ public class CourseOverviewController {
      */
     @FXML
     public void initialize() {
+        enrollmentTable.setItems(enrollmentObservableList);
         enrollmentStudentSerialColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleStringProperty(enrollment.getStudent().getSerial());
@@ -96,7 +98,7 @@ public class CourseOverviewController {
             Course mergedCourse = em.merge(course);
 //            nStudentsLabel.setText(String.valueOf(mergedCourse.getEnrollmentList().size()));
 //            nStudentsLabel.setText(getNStudentsQuery());
-            enrollmentTable.setItems(FXCollections.observableList(mergedCourse.getEnrollmentList()));
+            enrollmentObservableList.addAll(mergedCourse.getEnrollmentList());
 //            enrollmentTable.setItems(getEnrollmentData());
 
             em.getTransaction().commit();
@@ -105,7 +107,7 @@ public class CourseOverviewController {
             courseTitleLabel.setText(course.getName());
             teacherLabel.setText(course.getTeacherName());
             avgGradeLabel.setText(getAvgGradeQuery());
-            nStudentsLabel.setText(String.valueOf(enrollmentTable.getItems().size()));
+            nStudentsLabel.setText(String.valueOf(enrollmentObservableList.size()));
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -19,9 +19,16 @@ import javafx.stage.Stage;
 import javax.management.InvalidAttributeValueException;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Students list controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-24
+ */
 public class StudentTabController {
 
     @FXML private TableView<Student> studentTable;
@@ -31,6 +38,7 @@ public class StudentTabController {
     @FXML private TableColumn<Student, String> studentResidenceColumn;
     @FXML private TableColumn<Student, LocalDate> studentBirthdayColumn;
 
+    ObservableList<Student> studentObservableList = FXCollections.observableArrayList();
     EntityManagerFactory emf;
 
     /**
@@ -38,6 +46,7 @@ public class StudentTabController {
      */
     @FXML
     public void initialize() {
+        studentTable.setItems(studentObservableList);
         studentSerialColumn.setCellValueFactory(new PropertyValueFactory<>("serial"));
         studentFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         studentLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
@@ -84,18 +93,22 @@ public class StudentTabController {
         fillStudentTable();
     }
 
-    public void fillStudentTable() {
-        studentTable.setItems(getStudentData());
+    /**
+     * Fills the students table with the data from the DB.
+     */
+    @FXML
+    private void fillStudentTable() {
+        studentObservableList.addAll(getStudentData());
     }
 
-    private ObservableList<Student> getStudentData() {
-        ObservableList<Student> studentObservableList = null;
+    private List<Student> getStudentData() {
+        List<Student> studentObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
             String jpql = "SELECT s FROM Student s";
             TypedQuery<Student> q = em.createQuery(jpql, Student.class);
-            studentObservableList = FXCollections.observableList(q.getResultList());
+            studentObservableList = q.getResultList();
 
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -104,17 +117,20 @@ public class StudentTabController {
         return studentObservableList;
     }
 
+    /**
+     * Deletes the selected student from the DB.
+     */
     @FXML
     void handleDelete() {
         try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex();
             em.getTransaction().begin();
 
-            Student s = em.merge(studentTable.getItems().get(selectedIndex));
+            Student s = em.merge(studentObservableList.get(selectedIndex));
             em.remove(s);
 
             em.getTransaction().commit();
-            studentTable.getItems().remove(selectedIndex);
+            studentObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
         } catch (Exception e) {
@@ -122,6 +138,9 @@ public class StudentTabController {
         }
     }
 
+    /**
+     * Updates the information about the selected student.
+     */
     @FXML
     void handleEdit() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -132,7 +151,7 @@ public class StudentTabController {
             controller.initializeEdit();
 
             int selectedIndex = selectedIndex();
-            controller.setStudent(studentTable.getItems().get(selectedIndex));
+            controller.setStudent(studentObservableList.get(selectedIndex));
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Edit Student");
@@ -143,11 +162,11 @@ public class StudentTabController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Student s = em.merge(studentTable.getItems().get(selectedIndex));
+                Student s = em.merge(studentObservableList.get(selectedIndex));
                 controller.updateStudent(s);
 
                 em.getTransaction().commit();
-                studentTable.setItems(getStudentData());
+                studentObservableList.set(selectedIndex, s);
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
@@ -158,6 +177,9 @@ public class StudentTabController {
         }
     }
 
+    /**
+     * Adds a new student to the DB.
+     */
     @FXML
     void handleNew() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -183,7 +205,7 @@ public class StudentTabController {
                 em.persist(newStudent);
 
                 em.getTransaction().commit();
-                studentTable.getItems().add(newStudent);
+                studentObservableList.add(newStudent);
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
@@ -195,8 +217,8 @@ public class StudentTabController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component.
-     * @return the index of the selected item
+     * Returns the index of the selected student in the StudentTable.
+     * @return the index of the selected student
      */
     int selectedIndex() {
         int selectedIndex = studentTable.getSelectionModel().getSelectedIndex();

@@ -9,6 +9,7 @@ import jakarta.persistence.TypedQuery;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -45,6 +46,7 @@ public class StudentOverviewController {
     @FXML private TableColumn<Enrollment, Optional<Integer>> enrollmentGradeColumn;
 
     Student student;
+    ObservableList<Enrollment> enrollmentObservableList = FXCollections.observableArrayList();
     EntityManagerFactory emf;
 
     /**
@@ -52,6 +54,7 @@ public class StudentOverviewController {
      */
     @FXML
     public void initialize() {
+        enrollmentTable.setItems(enrollmentObservableList);
         enrollmentCourseCodeColumn.setCellValueFactory(cellData -> {
             Enrollment enrollment = cellData.getValue();
             return new SimpleObjectProperty<>(enrollment.getCourse().getId());
@@ -82,7 +85,7 @@ public class StudentOverviewController {
             em.getTransaction().begin();
 
             Student mergedStudent = em.merge(student);
-            enrollmentTable.setItems(FXCollections.observableList(mergedStudent.getEnrollmentList()));
+            enrollmentObservableList.addAll(mergedStudent.getEnrollmentList());
 
             em.getTransaction().commit();
 
@@ -137,7 +140,7 @@ public class StudentOverviewController {
             EnrollmentEvaluateDialogController controller = loader.getController();
 
             int selectedIndex = selectedIndex();
-            Enrollment enrollment = enrollmentTable.getItems().get(selectedIndex);
+            Enrollment enrollment = enrollmentObservableList.get(selectedIndex);
             if (enrollment.isEvaluated())
                 throw new IllegalArgumentException();
             controller.setEnrollment(enrollment);
@@ -154,10 +157,8 @@ public class StudentOverviewController {
                 Enrollment mergedEnrollment = em.merge(enrollment);
                 controller.updateEnrollment(mergedEnrollment);
 
-                Student mergedStudent = em.merge(student);
-                enrollmentTable.setItems(FXCollections.observableList(mergedStudent.getEnrollmentList()));
-
                 em.getTransaction().commit();
+                enrollmentObservableList.set(selectedIndex, mergedEnrollment);
                 avgGradeLabel.setText(getAvgGradeQuery());
             }
         } catch (NoSuchElementException e) {
@@ -197,7 +198,7 @@ public class StudentOverviewController {
                 em.persist(enrollment);
 
                 em.getTransaction().commit();
-                enrollmentTable.getItems().add(enrollment);
+                enrollmentObservableList.add(enrollment);
             }
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
@@ -242,7 +243,7 @@ public class StudentOverviewController {
     public void handleDrop() {
         try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex();
-            Enrollment enrollment = enrollmentTable.getItems().get(selectedIndex);
+            Enrollment enrollment = enrollmentObservableList.get(selectedIndex);
             if (enrollment.isEvaluated())
                 throw new IllegalArgumentException();
 
@@ -252,7 +253,7 @@ public class StudentOverviewController {
             em.remove(mergedEnrollment);
 
             em.getTransaction().commit();
-            enrollmentTable.getItems().remove(selectedIndex);
+            enrollmentObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
         } catch (IllegalArgumentException e) {

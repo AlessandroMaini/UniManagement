@@ -16,9 +16,16 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Courses list controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-24
+ */
 public class CourseTabController {
 
     @FXML private TableView<Course> courseTable;
@@ -26,6 +33,7 @@ public class CourseTabController {
     @FXML private TableColumn<Course, String> courseNameColumn;
     @FXML private TableColumn<Course, String> courseTeacherColumn;
 
+    ObservableList<Course> courseObservableList = FXCollections.observableArrayList();
     EntityManagerFactory emf;
 
     /**
@@ -33,6 +41,7 @@ public class CourseTabController {
      */
     @FXML
     public void initialize() {
+        courseTable.setItems(courseObservableList);
         courseCodeColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         courseNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         courseTeacherColumn.setCellValueFactory(new PropertyValueFactory<>("teacherName"));
@@ -77,19 +86,33 @@ public class CourseTabController {
         fillCourseTable();
     }
 
-    @FXML
-    public void fillCourseTable() {
-        courseTable.setItems(getCourseData());
+    /**
+     * Updates the course-teacher column after a modification of teachers DB.
+     * @param coursesToUpdate the list of courses to update
+     */
+    public void updateCourseTable(List<Course> coursesToUpdate) {
+        for (Course c : courseObservableList)
+            for (Course u : coursesToUpdate)
+                if (c.getId() == u.getId())
+                    courseObservableList.set(courseObservableList.indexOf(c), u);
     }
 
-    private ObservableList<Course> getCourseData() {
-        ObservableList<Course> courseObservableList = null;
+    /**
+     * Fills the courses table with the data from the DB.
+     */
+    @FXML
+    private void fillCourseTable() {
+        courseObservableList.addAll(getCourseData());
+    }
+
+    private List<Course> getCourseData() {
+        List<Course> courseObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
             String jpql = "SELECT c FROM Course c";
             TypedQuery<Course> q = em.createQuery(jpql, Course.class);
-            courseObservableList = FXCollections.observableList(q.getResultList());
+            courseObservableList = q.getResultList();
 
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -98,17 +121,20 @@ public class CourseTabController {
         return courseObservableList;
     }
 
+    /**
+     * Deletes the selected course from the DB.
+     */
     @FXML
     void handleDelete() {
         try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex();
             em.getTransaction().begin();
 
-            Course c = em.merge(courseTable.getItems().get(selectedIndex));
+            Course c = em.merge(courseObservableList.get(selectedIndex));
             em.remove(c);
 
             em.getTransaction().commit();
-            courseTable.getItems().remove(selectedIndex);
+            courseObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
         } catch (Exception e) {
@@ -116,6 +142,9 @@ public class CourseTabController {
         }
     }
 
+    /**
+     * Updates the information about the selected course.
+     */
     @FXML
     void handleEdit() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -125,7 +154,7 @@ public class CourseTabController {
             CourseEditDialogController controller = loader.getController();
 
             int selectedIndex = selectedIndex();
-            controller.setCourse(courseTable.getItems().get(selectedIndex));
+            controller.setCourse(courseObservableList.get(selectedIndex));
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Edit Course");
@@ -136,11 +165,11 @@ public class CourseTabController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Course c = em.merge(courseTable.getItems().get(selectedIndex));
+                Course c = em.merge(courseObservableList.get(selectedIndex));
                 controller.updateCourse(c);
 
                 em.getTransaction().commit();
-                courseTable.setItems(getCourseData());
+                courseObservableList.set(selectedIndex, c);
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
@@ -149,6 +178,9 @@ public class CourseTabController {
         }
     }
 
+    /**
+     * Adds a new course to the DB.
+     */
     @FXML
     void handleNew() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -173,7 +205,7 @@ public class CourseTabController {
                 em.persist(newCourse);
 
                 em.getTransaction().commit();
-                courseTable.getItems().add(newCourse);
+                courseObservableList.add(newCourse);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -181,8 +213,8 @@ public class CourseTabController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component.
-     * @return the index of the selected item
+     * Returns the index of the selected course in the CourseTable.
+     * @return the index of the selected course
      */
     int selectedIndex() {
         int selectedIndex = courseTable.getSelectionModel().getSelectedIndex();

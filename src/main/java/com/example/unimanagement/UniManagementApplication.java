@@ -1,7 +1,6 @@
 package com.example.unimanagement;
 
 import com.example.unimanagement.persistence.CustomPersistenceUnitInfo;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +23,9 @@ public class UniManagementApplication extends Application {
         props.put("hibernate.show_sql", "true");
         emf = new HibernatePersistenceProvider()
                 .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("general-overview-view.fxml"));
+        URL fxmlLocation = getClass().getResource("general-overview-view.fxml");
+        System.out.println(fxmlLocation);
+        FXMLLoader loader = new FXMLLoader(fxmlLocation);
         Parent root = loader.load();
 
         GeneralOverviewController generalOverviewController = loader.getController();

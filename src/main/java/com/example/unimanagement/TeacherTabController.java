@@ -18,9 +18,17 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Teachers list controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-24
+ */
 public class TeacherTabController {
 
     @FXML private TableView<Teacher> teacherTable;
@@ -29,14 +37,16 @@ public class TeacherTabController {
     @FXML private TableColumn<Teacher, String> teacherResidenceColumn;
     @FXML private TableColumn<Teacher, LocalDate> teacherBirthdayColumn;
 
+    ObservableList<Teacher> teacherObservableList = FXCollections.observableArrayList();
+    CourseTabController courseController; // reference necessary to update the course-teacher column
     EntityManagerFactory emf;
-    CourseTabController courseController; // reference necessary to update the course teacher column
 
     /**
      * Initializes the controller class. This method is automatically called after the fxml file has been loaded.
      */
     @FXML
     public void initialize() {
+        teacherTable.setItems(teacherObservableList);
         teacherFirstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         teacherLastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         teacherResidenceColumn.setCellValueFactory(new PropertyValueFactory<>("residence"));
@@ -86,18 +96,22 @@ public class TeacherTabController {
         this.courseController = courseController;
     }
 
-    public void fillTeacherTable() {
-        teacherTable.setItems(getTeacherData());
+    /**
+     * Fills the teachers table with the data from the DB.
+     */
+    @FXML
+    private void fillTeacherTable() {
+        teacherObservableList.addAll(getTeacherData());
     }
 
-    private ObservableList<Teacher> getTeacherData() {
-        ObservableList<Teacher> teacherObservableList = null;
+    private List<Teacher> getTeacherData() {
+        List<Teacher> teacherObservableList = null;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
             String jpql = "SELECT t FROM Teacher t";
             TypedQuery<Teacher> q = em.createQuery(jpql, Teacher.class);
-            teacherObservableList = FXCollections.observableList(q.getResultList());
+            teacherObservableList = q.getResultList();
 
             em.getTransaction().commit();
         } catch (Exception e) {
@@ -106,20 +120,25 @@ public class TeacherTabController {
         return teacherObservableList;
     }
 
+    /**
+     * Deletes the selected teacher from the DB.
+     */
     @FXML
     void handleDelete() {
         try (EntityManager em = emf.createEntityManager()) {
             int selectedIndex = selectedIndex();
             em.getTransaction().begin();
 
-            Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
+            Teacher t = em.merge(teacherObservableList.get(selectedIndex));
             for (Course c : t.getCourseList())
                 c.setTeacher(null);
+            List<Course> coursesToUpdate = new ArrayList<>(t.getCourseList());
+
             em.remove(t);
 
             em.getTransaction().commit();
-            courseController.fillCourseTable();
-            teacherTable.getItems().remove(selectedIndex);
+            courseController.updateCourseTable(coursesToUpdate);
+            teacherObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
         } catch (Exception e) {
@@ -127,6 +146,9 @@ public class TeacherTabController {
         }
     }
 
+    /**
+     * Updates the information about the selected teacher.
+     */
     @FXML
     void handleEdit() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -136,7 +158,7 @@ public class TeacherTabController {
             TeacherEditDialogController controller = loader.getController();
 
             int selectedIndex = selectedIndex();
-            controller.setTeacher(teacherTable.getItems().get(selectedIndex));
+            controller.setTeacher(teacherObservableList.get(selectedIndex));
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Edit Teacher");
@@ -147,12 +169,13 @@ public class TeacherTabController {
             if (clickedButton.orElse(ButtonType.CANCEL) == ButtonType.OK) {
                 em.getTransaction().begin();
 
-                Teacher t = em.merge(teacherTable.getItems().get(selectedIndex));
+                Teacher t = em.merge(teacherObservableList.get(selectedIndex));
                 controller.updateTeacher(t);
+                List<Course> coursesToUpdate = new ArrayList<>(t.getCourseList());
 
                 em.getTransaction().commit();
-                courseController.fillCourseTable();
-                teacherTable.setItems(getTeacherData());
+                courseController.updateCourseTable(coursesToUpdate);
+                teacherObservableList.set(selectedIndex, t);
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
@@ -161,6 +184,9 @@ public class TeacherTabController {
         }
     }
 
+    /**
+     * Adds a new teacher to the DB.
+     */
     @FXML
     void handleNew() {
         try (EntityManager em = emf.createEntityManager()) {
@@ -185,7 +211,7 @@ public class TeacherTabController {
                 em.persist(newTeacher);
 
                 em.getTransaction().commit();
-                teacherTable.getItems().add(newTeacher);
+                teacherObservableList.add(newTeacher);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -193,8 +219,8 @@ public class TeacherTabController {
     }
 
     /**
-     * Returns the index of the selected item in the TableView component.
-     * @return the index of the selected item
+     * Returns the index of the selected teacher in the TeacherTable.
+     * @return the index of the selected teacher
      */
     int selectedIndex() {
         int selectedIndex = teacherTable.getSelectionModel().getSelectedIndex();

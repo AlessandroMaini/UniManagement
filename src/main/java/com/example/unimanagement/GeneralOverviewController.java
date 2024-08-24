@@ -4,6 +4,12 @@ import jakarta.persistence.EntityManagerFactory;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 
+/**
+ * General overview controller.
+ *
+ * @author Alessandro Maini
+ * @version 2024-08-24
+ */
 public class GeneralOverviewController {
 
     @FXML private Parent students;
