@@ -13,12 +13,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.unimanagement.StudentOverviewController">
    <center>
       <AnchorPane prefHeight="400.0" prefWidth="800.0">
          <children>
-            <TableView fx:id="enrollmentTable" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="enrollmentTable" prefHeight="400.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
                 <TableColumn fx:id="enrollmentCourseCodeColumn" prefWidth="75.0" text="Course Code" />
                 <TableColumn fx:id="enrollmentCourseNameColumn" prefWidth="75.0" text="Course Name" />

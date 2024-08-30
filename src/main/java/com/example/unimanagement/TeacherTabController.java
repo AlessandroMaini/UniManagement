@@ -83,7 +83,7 @@ public class TeacherTabController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -105,7 +105,7 @@ public class TeacherTabController {
     }
 
     private List<Teacher> getTeacherData() {
-        List<Teacher> teacherObservableList = null;
+        List<Teacher> teacherObservableList;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -114,8 +114,6 @@ public class TeacherTabController {
             teacherObservableList = q.getResultList();
 
             em.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return teacherObservableList;
     }
@@ -141,8 +139,6 @@ public class TeacherTabController {
             teacherObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -179,8 +175,8 @@ public class TeacherTabController {
             }
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -213,8 +209,8 @@ public class TeacherTabController {
                 em.getTransaction().commit();
                 teacherObservableList.add(newTeacher);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

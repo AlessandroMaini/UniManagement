@@ -24,7 +24,6 @@ public class UniManagementApplication extends Application {
         emf = new HibernatePersistenceProvider()
                 .createContainerEntityManagerFactory(new CustomPersistenceUnitInfo(), props);
         URL fxmlLocation = getClass().getResource("general-overview-view.fxml");
-        System.out.println(fxmlLocation);
         FXMLLoader loader = new FXMLLoader(fxmlLocation);
         Parent root = loader.load();
 

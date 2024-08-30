@@ -43,19 +43,11 @@ public class Enrollment {
         return !(examinationDate == null || grade == null);
     }
 
-    public Integer getGrade() {
-        return grade;
-    }
-
     public void setGrade(Integer grade) throws InvalidAttributeValueException {
         if (grade < 18 || grade > 30)
             throw new InvalidAttributeValueException();
         else
             this.grade = grade;
-    }
-
-    public LocalDate getExaminationDate() {
-        return examinationDate;
     }
 
     public void setExaminationDate(LocalDate examinationDate) {
@@ -66,8 +58,12 @@ public class Enrollment {
         return student;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public Integer getGrade() {
+        return grade;
+    }
+
+    public LocalDate getExaminationDate() {
+        return examinationDate;
     }
 
     public Course getCourse() {

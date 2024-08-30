@@ -93,8 +93,6 @@ public class StudentOverviewController {
             studentLastNameLabel.setText(student.getLastName());
             studentSerialLabel.setText(student.getSerial());
             avgGradeLabel.setText(getAvgGradeQuery());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -103,7 +101,7 @@ public class StudentOverviewController {
      * @return the average grade of the student
      */
     private String getAvgGradeQuery() {
-        String avgGrade = null;
+        String avgGrade;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -122,8 +120,6 @@ public class StudentOverviewController {
                 avgGrade = "No Data";
             else
                 avgGrade = avg.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return avgGrade;
     }
@@ -167,8 +163,8 @@ public class StudentOverviewController {
             showInvalidAttributeValueAlert();
         } catch (IllegalArgumentException e) {
             showInvalidSelectionAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -202,8 +198,8 @@ public class StudentOverviewController {
             }
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -212,7 +208,7 @@ public class StudentOverviewController {
      * @return the list the courses in which the student is not enrolled
      */
     private List<Course> getNotEnrolledCourses() {
-        List<Course> courseList = null;
+        List<Course> courseList;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -230,8 +226,6 @@ public class StudentOverviewController {
             courseList = q.getResultList();
 
             em.getTransaction().commit(); // ends the transaction
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return courseList;
     }
@@ -258,8 +252,6 @@ public class StudentOverviewController {
             showNoCourseSelectedAlert();
         } catch (IllegalArgumentException e) {
             showInvalidSelectionAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -280,7 +272,7 @@ public class StudentOverviewController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

@@ -71,10 +71,6 @@ public class Course {
         return enrollmentList;
     }
 
-    public void setEnrollmentList(List<Enrollment> enrollmentList) {
-        this.enrollmentList = enrollmentList;
-    }
-
     @Override
     public String toString() {
         return "Course{" + "id=" + id + ", name='" + name + '\'' + '}';

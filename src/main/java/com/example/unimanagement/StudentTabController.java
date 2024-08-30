@@ -84,7 +84,7 @@ public class StudentTabController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -102,7 +102,7 @@ public class StudentTabController {
     }
 
     private List<Student> getStudentData() {
-        List<Student> studentObservableList = null;
+        List<Student> studentObservableList;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -111,8 +111,6 @@ public class StudentTabController {
             studentObservableList = q.getResultList();
 
             em.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return studentObservableList;
     }
@@ -133,8 +131,6 @@ public class StudentTabController {
             studentObservableList.remove(selectedIndex);
         } catch (NoSuchElementException e) {
             showNoPersonSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -172,8 +168,8 @@ public class StudentTabController {
             showNoPersonSelectedAlert();
         } catch (InvalidAttributeValueException e) {
             showInvalidAttributeValueAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -211,8 +207,8 @@ public class StudentTabController {
             showNoPersonSelectedAlert();
         } catch (InvalidAttributeValueException | PersistenceException e) {
             showInvalidAttributeValueAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

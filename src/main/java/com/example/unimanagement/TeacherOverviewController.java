@@ -82,8 +82,6 @@ public class TeacherOverviewController {
             teacherFirstNameLabel.setText(teacher.getFirstName());
             teacherLastNameLabel.setText(teacher.getLastName());
             nCoursesLabel.setText(String.valueOf(courseObservableList.size()));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -100,7 +98,7 @@ public class TeacherOverviewController {
      * @return the number of students in the course
      */
     private Long getNStudentsFromCourseQuery(Course course) {
-        Long nStudents = null;
+        Long nStudents;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -115,8 +113,6 @@ public class TeacherOverviewController {
             nStudents = q.getSingleResult();
 
             em.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return nStudents;
     }
@@ -153,8 +149,8 @@ public class TeacherOverviewController {
             }
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -163,7 +159,7 @@ public class TeacherOverviewController {
      * @return the list of unassigned courses
      */
     private List<Course> getUnassignedCourses() {
-        List<Course> courseList = null;
+        List<Course> courseList;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -177,8 +173,6 @@ public class TeacherOverviewController {
             courseList = q.getResultList();
 
             em.getTransaction().commit(); // ends the transaction
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return courseList;
     }
@@ -200,8 +194,6 @@ public class TeacherOverviewController {
             nCoursesLabel.setText(String.valueOf(courseObservableList.size()));
         } catch (NoSuchElementException e) {
             showNoCourseSelectedAlert();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -222,7 +214,7 @@ public class TeacherOverviewController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

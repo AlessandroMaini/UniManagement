@@ -101,10 +101,6 @@ public class Student {
         return enrollmentList;
     }
 
-    public void setEnrollmentList(List<Enrollment> enrollmentList) {
-        this.enrollmentList = enrollmentList;
-    }
-
     @Override
     public String toString() {
         return "Student{" + "serial='" + serial + '\'' + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\'' + ", residence='" + residence + '\'' + ", birthday=" + birthday + '}';

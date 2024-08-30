@@ -25,14 +25,6 @@ public class EnrollmentKey implements Serializable {
         this.course = course;
     }
 
-    public Student getStudent() {
-        return student;
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o)

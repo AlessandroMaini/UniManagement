@@ -86,10 +86,6 @@ public class Teacher {
         return courseList;
     }
 
-    public void setCourseList(List<Course> courseList) {
-        this.courseList = courseList;
-    }
-
     @Override
     public String toString() {
         return "Teacher{" + "id=" + id + ", firstName='" + firstName + '\'' + ", lastName='" + lastName + '\'' + ", residence='" + residence + '\'' + ", birthday=" + birthday + '}';

@@ -17,7 +17,7 @@
    <center>
       <AnchorPane prefHeight="400.0" prefWidth="800.0">
          <children>
-            <TableView fx:id="enrollmentTable" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="enrollmentTable" prefHeight="400.0" prefWidth="800.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
                 <TableColumn fx:id="enrollmentStudentSerialColumn" prefWidth="75.0" text="Serial" />
                 <TableColumn fx:id="enrollmentStudentFirstNameColumn" prefWidth="75.0" text="First Name" />
