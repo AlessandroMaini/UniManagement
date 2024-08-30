@@ -12,3 +12,6 @@ The software uses the **Hibernate** framework according to the standard defined 
 
 ## Graphics
 The GUI is obtained through the **JavaFX** framework.
+
+## Entity-Relationship Model
+![e-r-model](https://github.com/user-attachments/assets/a3674616-dc51-4df4-a598-5c4d85f0eaf5)
