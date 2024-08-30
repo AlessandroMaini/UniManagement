@@ -96,10 +96,7 @@ public class CourseOverviewController {
             em.getTransaction().begin();
 
             Course mergedCourse = em.merge(course);
-//            nStudentsLabel.setText(String.valueOf(mergedCourse.getEnrollmentList().size()));
-//            nStudentsLabel.setText(getNStudentsQuery());
             enrollmentObservableList.addAll(mergedCourse.getEnrollmentList());
-//            enrollmentTable.setItems(getEnrollmentData());
 
             em.getTransaction().commit();
 
@@ -108,62 +105,7 @@ public class CourseOverviewController {
             teacherLabel.setText(course.getTeacherName());
             avgGradeLabel.setText(getAvgGradeQuery());
             nStudentsLabel.setText(String.valueOf(enrollmentObservableList.size()));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-    }
-
-    /**
-     * Returns the list of enrollments for the course.
-     * @return the list of enrollments for the course
-     */
-    private ObservableList<Enrollment> getEnrollmentData() {
-        ObservableList<Enrollment> enrollmentObservableList = null;
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-
-            String jpql = """
-                     SELECT e
-                     FROM Enrollment e
-                     WHERE e.course = :course
-                    """;
-
-            TypedQuery<Enrollment> q = em.createQuery(jpql, Enrollment.class);
-            q.setParameter("course", course);
-            enrollmentObservableList = FXCollections.observableList(q.getResultList());
-
-            em.getTransaction().commit(); // ends the transaction
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return enrollmentObservableList;
-    }
-
-    /**
-     * Returns the number of students in the course.
-     * @return the number of students in the course
-     */
-    private String getNStudentsQuery() {
-        String nStudents = null;
-        try (EntityManager em = emf.createEntityManager()) {
-            em.getTransaction().begin();
-
-            String jpql = """
-                    SELECT COUNT(e)
-                    FROM Enrollment e
-                    WHERE e.course = :course
-                    """;
-
-            TypedQuery<Long> q = em.createQuery(jpql, Long.class);
-            q.setParameter("course", course);
-            Long count = q.getSingleResult();
-
-            em.getTransaction().commit();
-            nStudents = count.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return nStudents;
     }
 
     /**
@@ -171,7 +113,7 @@ public class CourseOverviewController {
      * @return the average grade of the course exams
      */
     private String getAvgGradeQuery() {
-        String avgGrade = null;
+        String avgGrade;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
 
@@ -190,8 +132,6 @@ public class CourseOverviewController {
                 avgGrade = "No Data";
             else
                 avgGrade = avg.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return avgGrade;
     }
@@ -213,7 +153,7 @@ public class CourseOverviewController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }
